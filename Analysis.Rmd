@@ -1,33 +1,4 @@
-data <- read.csv("UCI-electricity/UCI_data.csv")
-
-
-# Display the first few rows of the data
-head(data)
-
-# Display the last few rows of the data
-tail(data)
-
-# Display the structure of the data
-str(data)
-
-library(striprtf)
-
-# Specify the path to your RTF file
-file_path <- "UCI-electricity/description.rtf"
-
-# Read the RTF file
-rtf_content <- read_rtf(file_path)
-
-# Display the content
-cat(rtf_content)
-
-# Count of missing values in each column
-colSums(is.na(data))
-
-# Percentage of missing values in each column
-colMeans(is.na(data)) * 100
-
-
+```{r}
 # Histograms for temperature variables
 hist(data$T1, main="Histogram of Temperature in Kitchen", xlab="T1 (Celsius)", col="blue")
 hist(data$T2, main="Histogram of Temperature in Living Room", xlab="T2 (Celsius)", col="green")
@@ -60,3 +31,4 @@ hist(data$Tdewpoint, main="Histogram of Dewpoint Temperature (Chievres)", xlab="
 hist(data$rv1, main="Histogram of Random Variable 1", xlab="rv1", col="orange")
 hist(data$rv2, main="Histogram of Random Variable 2", xlab="rv2", col="yellow")
 hist(data$TARGET_energy, main="Histogram of Energy Use (Wh)", xlab="TARGET_energy (Wh)", col="pink")
+```
