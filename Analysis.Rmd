@@ -1,34 +1,294 @@
+---
+output:
+  word_document: default
+  html_document: default
+  pdf_document: default
+---
 ```{r}
-# Histograms for temperature variables
-hist(data$T1, main="Histogram of Temperature in Kitchen", xlab="T1 (Celsius)", col="blue")
-hist(data$T2, main="Histogram of Temperature in Living Room", xlab="T2 (Celsius)", col="green")
-hist(data$T3, main="Histogram of Temperature in Laundry Room", xlab="T3 (Celsius)", col="red")
-hist(data$T4, main="Histogram of Temperature in Office Room", xlab="T4 (Celsius)", col="purple")
-hist(data$T5, main="Histogram of Temperature in Bathroom", xlab="T5 (Celsius)", col="orange")
-hist(data$T6, main="Histogram of Temperature Outside North", xlab="T6 (Celsius)", col="yellow")
-hist(data$T7, main="Histogram of Temperature in Ironing Room", xlab="T7 (Celsius)", col="pink")
-hist(data$T8, main="Histogram of Temperature in Teenager Room 2", xlab="T8 (Celsius)", col="cyan")
-hist(data$T9, main="Histogram of Temperature in Parents Room", xlab="T9 (Celsius)", col="brown")
-hist(data$T_out, main="Histogram of Temperature Outside (Chievres)", xlab="T_out (Celsius)", col="grey")
+data <- read.csv("UCI-electricity/UCI_data.csv")
 
-# Histograms for humidity variables
-hist(data$RH_1, main="Histogram of Humidity in Kitchen", xlab="RH_1 (%)", col="blue")
-hist(data$RH_2, main="Histogram of Humidity in Living Room", xlab="RH_2 (%)", col="green")
-hist(data$RH_3, main="Histogram of Humidity in Laundry Room", xlab="RH_3 (%)", col="red")
-hist(data$RH_4, main="Histogram of Humidity in Office Room", xlab="RH_4 (%)", col="purple")
-hist(data$RH_5, main="Histogram of Humidity in Bathroom", xlab="RH_5 (%)", col="orange")
-hist(data$RH_6, main="Histogram of Humidity Outside North", xlab="RH_6 (%)", col="yellow")
-hist(data$RH_7, main="Histogram of Humidity in Ironing Room", xlab="RH_7 (%)", col="pink")
-hist(data$RH_8, main="Histogram of Humidity in Teenager Room 2", xlab="RH_8 (%)", col="cyan")
-hist(data$RH_9, main="Histogram of Humidity in Parents Room", xlab="RH_9 (%)", col="brown")
-hist(data$RH_out, main="Histogram of Humidity Outside (Chievres)", xlab="RH_out (%)", col="grey")
+# Display the first few rows of the data
+head(data)
 
-# Additional numerical variables histograms
-hist(data$Press_mm_hg, main="Histogram of Pressure (Chievres)", xlab="Press_mm_hg (mm Hg)", col="blue")
-hist(data$Windspeed, main="Histogram of Wind Speed (Chievres)", xlab="Windspeed (m/s)", col="green")
-hist(data$Visibility, main="Histogram of Visibility (Chievres)", xlab="Visibility (km)", col="red")
-hist(data$Tdewpoint, main="Histogram of Dewpoint Temperature (Chievres)", xlab="Tdewpoint (Celsius)", col="purple")
-hist(data$rv1, main="Histogram of Random Variable 1", xlab="rv1", col="orange")
-hist(data$rv2, main="Histogram of Random Variable 2", xlab="rv2", col="yellow")
-hist(data$TARGET_energy, main="Histogram of Energy Use (Wh)", xlab="TARGET_energy (Wh)", col="pink")
+# Display the last few rows of the data
+tail(data)
+
+# Display the structure of the data
+str(data)
+
+library(striprtf)
+
+# Specify the path to your RTF file
+file_path <- "UCI-electricity/description.rtf"
+
+# Read the RTF file
+rtf_content <- read_rtf(file_path)
+
+# Display the content
+cat(rtf_content)
+
+# Count of missing values in each column
+colSums(is.na(data))
+
+# Percentage of missing values in each column
+colMeans(is.na(data)) * 100
 ```
+
+
+
+
+```{r}
+# Set up the plotting area for multiple plots
+par(mfrow=c(3, 1), mar=c(4, 4, 2, 1), oma=c(0, 0, 2, 0))
+
+# Plot the histograms for temperature variables
+par(mfrow=c(2, 5))
+hist(data$T1, main="Kitchen", xlab="T1 (Celsius)", col="blue")
+hist(data$T2, main="Living Room", xlab="T2 (Celsius)", col="green")
+hist(data$T3, main="Laundry Room", xlab="T3 (Celsius)", col="red")
+hist(data$T4, main="Office Room", xlab="T4 (Celsius)", col="purple")
+hist(data$T5, main="Bathroom", xlab="T5 (Celsius)", col="orange")
+hist(data$T6, main="Outside North", xlab="T6 (Celsius)", col="yellow")
+hist(data$T7, main="Ironing Room", xlab="T7 (Celsius)", col="pink")
+hist(data$T8, main="Teenager Room 2", xlab="T8 (Celsius)", col="cyan")
+hist(data$T9, main="Parents Room", xlab="T9 (Celsius)", col="brown")
+hist(data$T_out, main="Outside Chievres", xlab="T_out (Celsius)", col="grey")
+
+# Add an overall title for the temperature histograms
+mtext("Histograms of Temperature Variables", outer = TRUE, line = -2, cex = 1.5)
+
+# Plot the histograms for humidity variables
+par(mfrow=c(2, 5))
+hist(data$RH_1, main="Kitchen", xlab="RH_1 (%)", col="blue")
+hist(data$RH_2, main="Living Room", xlab="RH_2 (%)", col="green")
+hist(data$RH_3, main="Laundry Room", xlab="RH_3 (%)", col="red")
+hist(data$RH_4, main="Office Room", xlab="RH_4 (%)", col="purple")
+hist(data$RH_5, main="Bathroom", xlab="RH_5 (%)", col="orange")
+hist(data$RH_6, main="Outside North", xlab="RH_6 (%)", col="yellow")
+hist(data$RH_7, main="Ironing Room", xlab="RH_7 (%)", col="pink")
+hist(data$RH_8, main="Teenager Room 2", xlab="RH_8 (%)", col="cyan")
+hist(data$RH_9, main="Parents Room", xlab="RH_9 (%)", col="brown")
+hist(data$RH_out, main="Outside Chievres", xlab="RH_out (%)", col="grey")
+
+# Add an overall title for the humidity histograms
+mtext("Histograms of Humidity Variables", outer = TRUE, line = -22, cex = 1.5)
+
+# Plot the histograms for additional numerical variables
+par(mfrow=c(2, 3))
+hist(data$Press_mm_hg, main="Pressure (Chievres)", xlab="Press_mm_hg (mm Hg)", col="blue")
+hist(data$Windspeed, main="Wind Speed (Chievres)", xlab="Windspeed (m/s)", col="green")
+hist(data$Visibility, main="Visibility (Chievres)", xlab="Visibility (km)", col="red")
+hist(data$Tdewpoint, main="Dewpoint (Chievres)", xlab="Tdewpoint (Celsius)", col="purple")
+hist(data$rv1, main="Random Variable 1", xlab="rv1", col="orange")
+hist(data$rv2, main="Random Variable 2", xlab="rv2", col="yellow")
+hist(data$TARGET_energy, main="Energy Use (Wh)", xlab="TARGET_energy (Wh)", col="pink")
+
+# Add an overall title for the additional numerical variable histograms
+mtext("Histograms of Additional Numerical Variables", outer = TRUE, line = -42, cex = 1.5)
+```
+
+### Analysis of Temperature Variables
+
+- **Kitchen (T1):** 
+  - Distribution is approximately normal with a peak around 22°C.
+  - Most values range between 18°C and 26°C, indicating a stable temperature range in the kitchen.
+
+- **Living Room (T2):** 
+  - Slightly right-skewed distribution with a peak around 21°C.
+  - Values range from 16°C to 28°C, showing some variability but generally centered around comfortable room temperature.
+
+- **Laundry Room (T3):**
+  - Approximately normal distribution with a peak around 24°C.
+  - Values range between 18°C and 30°C, suggesting consistent conditions.
+
+- **Office Room (T4):**
+  - Normal distribution with a peak around 21°C.
+  - Values range between 16°C and 24°C, indicating good temperature control.
+
+- **Bathroom (T5):**
+  - Approximately normal distribution with a peak around 22°C.
+  - Values range between 16°C and 24°C, suggesting stable temperature control.
+
+- **Outside North (T6):**
+  - Distribution is right-skewed with a peak around 10°C.
+  - Values range from 0°C to 30°C, reflecting wider external temperature variations.
+
+- **Ironing Room (T7):**
+  - Approximately normal distribution with a peak around 21°C.
+  - Values range between 16°C and 24°C, indicating consistent temperature.
+
+- **Teenager Room 2 (T8):**
+  - Normal distribution with a peak around 22°C.
+  - Values range between 16°C and 24°C, showing consistent conditions.
+
+- **Parents Room (T9):**
+  - Approximately normal distribution with a peak around 21°C.
+  - Values range from 16°C to 24°C, suggesting stable conditions.
+
+- **Outside (Chievres, T_out):**
+  - Right-skewed distribution with a peak around 10°C.
+  - Values range from -5°C to 25°C, showing greater external temperature variation.
+
+
+### Analysis of Humidity Variables
+
+- **Kitchen (RH_1):**
+  - Normal distribution with a peak around 40%.
+  - Values range between 30% and 50%, indicating stable humidity.
+
+- **Living Room (RH_2):**
+  - Normal distribution with a peak around 35%.
+  - Values range between 20% and 40%, showing stable conditions.
+
+- **Laundry Room (RH_3):**
+  - Normal distribution with a peak around 40%.
+  - Values range between 30% and 50%, suggesting consistent conditions.
+
+- **Office Room (RH_4):**
+  - Normal distribution with a peak around 35%.
+  - Values range between 25% and 45%, indicating stable humidity.
+
+- **Bathroom (RH_5):**
+  - Right-skewed distribution with a peak around 60%.
+  - Values range between 40% and 80%, reflecting variability.
+
+- **Outside North (RH_6):**
+  - Bi-modal distribution with peaks around 15% and 80%.
+  - Values range from 0% to 100%, reflecting external humidity variability.
+
+- **Ironing Room (RH_7):**
+  - Normal distribution with a peak around 35%.
+  - Values range between 25% and 45%, indicating consistent conditions.
+
+- **Teenager Room 2 (RH_8):**
+  - Normal distribution with a peak around 45%.
+  - Values range between 30% and 60%, showing stable humidity.
+
+- **Parents Room (RH_9):**
+  - Normal distribution with a peak around 45%.
+  - Values range from 30% to 50%, suggesting stable conditions.
+
+- **Outside (Chievres, RH_out):**
+  - Right-skewed distribution with a peak around 80%.
+  - Values range from 20% to 100%, reflecting greater external humidity variation.
+
+### Analysis of Additional Numerical Variables
+
+- **Pressure (Chievres):**
+  - Approximately normal distribution with a peak around 760 mm Hg.
+  - Values range between 730 mm Hg and 770 mm Hg, indicating stable atmospheric pressure.
+
+- **Wind Speed (Chievres):**
+  - Right-skewed distribution with a peak around 2 m/s.
+  - Values range from 0 to 14 m/s, reflecting variability in wind speed.
+
+- **Visibility (Chievres):**
+  - Bi-modal distribution with peaks around 30 km and 40 km.
+  - Values range from 0 to 70 km, showing variability in visibility.
+
+- **Dewpoint (Chievres):**
+  - Approximately normal distribution with a peak around 5°C.
+  - Values range between -5°C and 15°C, indicating variability in dew point.
+
+- **Random Variable 1 (rv1):**
+  - Uniform distribution across the range.
+  - Values range between 0 and 50, suggesting a random distribution.
+
+- **Random Variable 2 (rv2):**
+  - Uniform distribution across the range.
+  - Values range between 0 and 50, suggesting a random distribution.
+
+- **Energy Use (Wh):**
+  - Right-skewed distribution with a peak around 50 Wh.
+  - Values range from 0 to 800 Wh, showing variability in energy usage.
+
+
+```{r Critical Analysis}
+# Compute the correlation matrix
+cor_matrix <- cor(data[, sapply(data, is.numeric)], use="complete.obs")
+
+# Install and load the corrplot package
+install.packages("corrplot")
+library(corrplot)
+
+# Visualize the correlation matrix
+corrplot(cor_matrix, method="circle", tl.cex = 0.5, tl.col = "black", tl.srt = 45)
+
+```
+## Correlation Analysis
+
+The correlation matrix plot above visualizes the relationships between the numerical variables in the dataset. Here are the key observations:
+
+- **Strong Positive Correlations:**
+  - **T1, T2, T3, T4, T5, T7, T8, T9:** These temperature variables are strongly positively correlated with each other (correlation coefficients close to 1). This indicates that temperatures across different rooms in the house tend to increase and decrease together.
+  - **RH_1, RH_2, RH_3, RH_4, RH_5, RH_7, RH_8, RH_9:** These humidity variables are also strongly positively correlated with each other, suggesting that humidity levels across different rooms tend to move in tandem.
+
+- **Negative Correlations:**
+  - **T1 and RH_1, T2 and RH_2, etc.:** There are moderate to strong negative correlations between temperature and humidity in the same room, indicating that as temperature increases, humidity decreases, and vice versa.
+
+- **External Temperature (T_out):**
+  - **T_out and T1, T2, etc.:** External temperature (T_out) has moderate positive correlations with internal temperatures, suggesting that changes in external temperature influence internal temperatures.
+
+- **Pressure (Press_mm_hg):**
+  - **Pressure and Humidity:** There is a slight negative correlation between pressure and humidity levels (RH_out), indicating that higher pressure may be associated with lower humidity levels.
+
+- **Wind Speed (Windspeed):**
+  - **Windspeed and Temperature:** Wind speed shows slight negative correlations with internal temperatures, suggesting that higher wind speeds might slightly reduce indoor temperatures.
+
+- **Visibility:**
+  - **Visibility and External Variables:** Visibility shows slight positive correlations with external temperature and slight negative correlations with external humidity.
+
+- **Energy Use (TARGET_energy):**
+  - **TARGET_energy and Internal Variables:** Energy use shows weak to moderate positive correlations with internal temperatures (e.g., T1, T2) and negative correlations with internal humidity levels (e.g., RH_1, RH_2). This indicates that higher energy use is associated with higher temperatures and lower humidity levels.
+
+These observations provide insights into how different environmental variables interact within the house and with external conditions. The correlations between temperatures, humidity, and energy use can help in understanding the energy dynamics and potential factors influencing energy consumption in the house.
+
+
+```{r Pair Plots}
+# Pair plots using the GGally package
+install.packages("GGally")
+library(GGally)
+ggpairs(data[, sapply(data, is.numeric)])
+
+```
+
+```{r Outlier Detection}
+# Box plots for temperature variables
+par(mfrow=c(2, 5)) # Arrange plots in a 2x5 grid
+boxplot(data$T1, main="Kitchen", col="blue")
+boxplot(data$T2, main="Living Room", col="green")
+boxplot(data$T3, main="Laundry Room", col="red")
+boxplot(data$T4, main="Office Room", col="purple")
+boxplot(data$T5, main="Bathroom", col="orange")
+boxplot(data$T6, main="Outside North", col="yellow")
+boxplot(data$T7, main="Ironing Room", col="pink")
+boxplot(data$T8, main="Teenager Room 2", col="cyan")
+boxplot(data$T9, main="Parents Room", col="brown")
+boxplot(data$T_out, main="Outside (Chievres)", col="grey")
+
+# Box plots for humidity variables
+par(mfrow=c(2, 5)) # Arrange plots in a 2x5 grid
+boxplot(data$RH_1, main="Kitchen", col="blue")
+boxplot(data$RH_2, main="Living Room", col="green")
+boxplot(data$RH_3, main="Laundry Room", col="red")
+boxplot(data$RH_4, main="Office Room", col="purple")
+boxplot(data$RH_5, main="Bathroom", col="orange")
+boxplot(data$RH_6, main="Outside North", col="yellow")
+boxplot(data$RH_7, main="Ironing Room", col="pink")
+boxplot(data$RH_8, main="Teenager Room 2", col="cyan")
+boxplot(data$RH_9, main="Parents Room", col="brown")
+boxplot(data$RH_out, main="Outside (Chievres)", col="grey")
+
+```
+
+
+```{r Time Series Analysis}
+# Convert the date column to Date type if not already
+data$date <- as.POSIXct(data$date, format="%Y-%m-%d %H:%M:%S")
+
+# Plot time series for key variables
+plot(data$date, data$T1, type="l", main="Temperature in Kitchen Over Time", xlab="Date", ylab="T1 (Celsius)", col="blue")
+plot(data$date, data$RH_1, type="l", main="Humidity in Kitchen Over Time", xlab="Date", ylab="RH_1 (%)", col="blue")
+
+```
+
