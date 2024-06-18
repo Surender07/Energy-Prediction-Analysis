@@ -245,10 +245,28 @@ These observations provide insights into how different environmental variables i
 
 
 ```{r Pair Plots}
-# Pair plots using the GGally package
+# Install necessary packages if not already installed
 install.packages("GGally")
+install.packages("dplyr")
+
+# Load the packages
 library(GGally)
-ggpairs(data[, sapply(data, is.numeric)])
+library(dplyr)
+
+# Select the columns for temperature, humidity, and additional numerical variables
+temperature_vars <- data %>% select(T1, T2, T3, T4, T5, T6, T7, T8, T9, T_out)
+humidity_vars <- data %>% select(RH_1, RH_2, RH_3, RH_4, RH_5, RH_6, RH_7, RH_8, RH_9, RH_out)
+additional_vars <- data %>% select(Press_mm_hg, Windspeed, Visibility, Tdewpoint, rv1, rv2, TARGET_energy)
+
+# Create pair plot for temperature variables
+ggpairs(temperature_vars, title = "Pair Plot for Temperature Variables")
+
+# Create pair plot for humidity variables
+ggpairs(humidity_vars, title = "Pair Plot for Humidity Variables")
+
+# Create pair plot for additional numerical variables
+ggpairs(additional_vars, title = "Pair Plot for Additional Numerical Variables")
+
 
 ```
 
@@ -283,12 +301,105 @@ boxplot(data$RH_out, main="Outside (Chievres)", col="grey")
 
 
 ```{r Time Series Analysis}
-# Convert the date column to Date type if not already
+install.packages("ggplot2")
+install.packages("dplyr")
+install.packages("tidyr")
+
+# Load the packages
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+# Convert the 'date' column to datetime format
 data$date <- as.POSIXct(data$date, format="%Y-%m-%d %H:%M:%S")
 
-# Plot time series for key variables
-plot(data$date, data$T1, type="l", main="Temperature in Kitchen Over Time", xlab="Date", ylab="T1 (Celsius)", col="blue")
-plot(data$date, data$RH_1, type="l", main="Humidity in Kitchen Over Time", xlab="Date", ylab="RH_1 (%)", col="blue")
+# Create long format for temperature variables
+temperature_vars <- data %>%
+  select(date, T1, T2, T3, T4, T5, T6, T7, T8, T9, T_out) %>%
+  pivot_longer(cols = -date, names_to = "variable", values_to = "value")
+
+# Plot time series for temperature variables
+ggplot(temperature_vars, aes(x=date, y=value, color=variable)) +
+  geom_line() +
+  labs(title="Temperature Time Series", y="Temperature (Celsius)", x="Date") +
+  theme_minimal() +
+  theme(legend.position="bottom") +
+  scale_color_manual(values=c("blue", "green", "red", "purple", "orange", "yellow", "pink", "cyan", "brown", "grey"))
+
+# Create long format for humidity variables
+humidity_vars <- data %>%
+  select(date, RH_1, RH_2, RH_3, RH_4, RH_5, RH_6, RH_7, RH_8, RH_9, RH_out) %>%
+  pivot_longer(cols = -date, names_to = "variable", values_to = "value")
+
+# Plot time series for humidity variables
+ggplot(humidity_vars, aes(x=date, y=value, color=variable)) +
+  geom_line() +
+  labs(title="Humidity Time Series", y="Humidity (%)", x="Date") +
+  theme_minimal() +
+  theme(legend.position="bottom") +
+  scale_color_manual(values=c("blue", "green", "red", "purple", "orange", "yellow", "pink", "cyan", "brown", "grey"))
+
+# Plot time series for energy use
+ggplot(data, aes(x=date, y=TARGET_energy)) +
+  geom_line(color="blue") +
+  labs(title="Energy Use Time Series", y="Energy Use (Wh)", x="Date") +
+  theme_minimal()
 
 ```
+### 1 Humidity Time Series
+
+#### Critical Analysis
+
+The humidity time series plot above visualizes the variations in humidity levels across different rooms and the outside environment over time. Here are the key observations:
+
+- **High Variability:**
+  - **RH_out:** There are significant fluctuations in the outside humidity levels, with frequent spikes and dips, indicating variable weather conditions.
+  - **RH_1 to RH_9:** Humidity levels inside the house are relatively stable, suggesting effective climate control.
+
+- **Patterns:**
+  - **RH_5 and RH_7:** Certain rooms show different humidity patterns, which could be due to localized factors like the presence of water sources or ventilation differences.
+  - **Indoor vs. Outdoor:** The stability of indoor humidity compared to outdoor suggests good insulation and effective use of HVAC systems.
+
+### 2. Temperature Time Series
+
+#### Critical Analysis
+
+The temperature time series plot above visualizes the variations in temperature levels across different rooms and the outside environment over time. Here are the key observations:
+
+- **Seasonal Patterns:**
+  - **T_out:** External temperature shows clear seasonal patterns, with temperatures fluctuating more significantly during certain periods.
+  - **T1 to T9:** Indoor temperatures remain relatively stable, indicating effective temperature control within the house.
+
+- **Room Variability:**
+  - **T3, T5:** Some rooms show more variability in temperature, potentially due to their location within the house or varying usage patterns.
+
+- **Insulation Effect:**
+  - The difference between indoor and outdoor temperature patterns suggests good insulation, which helps in maintaining a stable indoor environment despite external temperature changes.
+
+### 3. Energy Use Time Series
+
+#### Critical Analysis
+
+The energy use time series plot above visualizes the variations in energy consumption over time. Here are the key observations:
+
+- **High Variability:**
+  - Energy use shows significant fluctuations, with frequent spikes that likely correspond to peak usage times or specific high-energy activities.
+
+- **Cyclical Patterns:**
+  - There appears to be a cyclical pattern in energy use, potentially corresponding to daily or weekly usage cycles, indicating regular consumption behaviors.
+
+- **Peak Usage:**
+  - The spikes in energy use highlight peak consumption periods, which could be targeted for energy-saving measures to improve overall efficiency.
+
+### Conclusion
+
+The time series plots provide valuable insights into the behavior of humidity, temperature, and energy use in the building. Understanding these patterns is crucial for developing predictive models and implementing energy-saving measures.
+
+Further analysis could include:
+
+- Correlating temperature and humidity with energy use to identify key drivers.
+- Exploring anomalies and outliers to improve the reliability of the predictive models.
+- Implementing feature engineering techniques to capture seasonal and cyclical patterns effectively.
+
+By leveraging these insights, we can develop robust models to predict energy use and optimize energy consumption in low-energy buildings.
 
