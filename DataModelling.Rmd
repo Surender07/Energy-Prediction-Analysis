@@ -1,0 +1,219 @@
+Now that we've completed feature engineering and feature selection, the next steps involve model training, evaluation, and possibly hyperparameter tuning to optimize model performance.
+
+### Next Steps
+
+1. **Model Training:**
+   - Train different machine learning models on the selected features to compare their performance.
+
+2. **Model Evaluation:**
+   - Evaluate the performance of the trained models using appropriate metrics (e.g., RMSE, MAE, R^2) on the test dataset.
+
+3. **Hyperparameter Tuning:**
+   - Optimize the hyperparameters of the best-performing model to further improve its accuracy.
+
+4. **Model Interpretation and Analysis:**
+   - Interpret the results and analyze the model's performance to draw meaningful conclusions.
+
+### Step-by-Step Guide
+
+#### Step 1: Train Different Models
+
+We can start by training a few common regression models, such as Linear Regression, Random Forest, and Gradient Boosting.
+
+#### Step 2: Evaluate the Models
+
+Evaluate the performance of each model using metrics such as RMSE (Root Mean Squared Error), MAE (Mean Absolute Error), and R^2 (Coefficient of Determination).
+
+#### Step 3: Hyperparameter Tuning
+
+Use techniques like Grid Search or Random Search to find the best hyperparameters for the best-performing model.
+
+### Detailed Implementation
+
+#### Load Necessary Libraries
+
+```{r}
+# Install and load necessary libraries
+#install.packages("randomForest")
+#install.packages("gbm")
+#install.packages("caret")
+#install.packages("e1071")
+
+library(randomForest)
+library(gbm)
+library(caret)
+library(e1071)
+```
+
+#### Prepare Data
+
+Ensure the data is ready with selected important features and split into training and testing sets.
+
+```{r}
+# Selected top features based on importance scores
+selected_features <- c("TARGET_energy_lag1", "hour", "TARGET_energy_rollmean_3", 
+                       "TARGET_energy_rollsd_3", "T8", "Tdewpoint", 
+                       "T8_RH8_interaction", "T6_RH6_interaction", 
+                       "Press_mm_hg", "RH_9")
+
+# Create training and testing datasets with selected features
+trainData_top <- trainData[, c(selected_features, "TARGET_energy")]
+testData_top <- testData[, c(selected_features, "TARGET_energy")]
+```
+
+#### Train and Evaluate Models
+
+##### Linear Regression
+
+```{r}
+# Train Linear Regression model
+lm_model <- lm(TARGET_energy ~ ., data = trainData_top)
+
+# Predict on test data
+lm_predictions <- predict(lm_model, newdata = testData_top)
+
+# Evaluate Linear Regression model
+lm_rmse <- RMSE(lm_predictions, testData_top$TARGET_energy)
+lm_mae <- MAE(lm_predictions, testData_top$TARGET_energy)
+lm_r2 <- R2(lm_predictions, testData_top$TARGET_energy)
+
+cat("Linear Regression - RMSE:", lm_rmse, "MAE:", lm_mae, "R^2:", lm_r2, "\n")
+```
+
+##### Random Forest
+
+```{r}
+# Train Random Forest model
+rf_model <- randomForest(TARGET_energy ~ ., data = trainData_top, ntree = 100)
+
+# Predict on test data
+rf_predictions <- predict(rf_model, newdata = testData_top)
+
+# Evaluate Random Forest model
+rf_rmse <- RMSE(rf_predictions, testData_top$TARGET_energy)
+rf_mae <- MAE(rf_predictions, testData_top$TARGET_energy)
+rf_r2 <- R2(rf_predictions, testData_top$TARGET_energy)
+
+cat("Random Forest - RMSE:", rf_rmse, "MAE:", rf_mae, "R^2:", rf_r2, "\n")
+```
+
+##### Gradient Boosting
+
+```{r}
+# Train Gradient Boosting model
+gbm_model <- gbm(TARGET_energy ~ ., data = trainData_top, distribution = "gaussian", n.trees = 100)
+
+# Predict on test data
+gbm_predictions <- predict(gbm_model, newdata = testData_top, n.trees = 100)
+
+# Evaluate Gradient Boosting model
+gbm_rmse <- RMSE(gbm_predictions, testData_top$TARGET_energy)
+gbm_mae <- MAE(gbm_predictions, testData_top$TARGET_energy)
+gbm_r2 <- R2(gbm_predictions, testData_top$TARGET_energy)
+
+cat("Gradient Boosting - RMSE:", gbm_rmse, "MAE:", gbm_mae, "R^2:", gbm_r2, "\n")
+```
+
+#### Hyperparameter Tuning
+
+If Random Forest or Gradient Boosting shows the best performance, we can perform hyperparameter tuning for these models.
+
+##### Hyperparameter Tuning for Random Forest
+
+```{r}
+# Set up the control function for training
+control <- trainControl(method = "cv", number = 5)
+tunegrid <- expand.grid(.mtry = c(2, 3, 4, 5, 6, 7))
+
+# Train the model using cross-validation
+set.seed(123)
+rf_tuned <- train(TARGET_energy ~ ., data = trainData_top, method = "rf", 
+                  trControl = control, tuneGrid = tunegrid)
+
+# Print the best tuning parameter
+print(rf_tuned$bestTune)
+
+# Predict on test data
+rf_tuned_predictions <- predict(rf_tuned, newdata = testData_top)
+
+# Evaluate the tuned model
+rf_tuned_rmse <- RMSE(rf_tuned_predictions, testData_top$TARGET_energy)
+rf_tuned_mae <- MAE(rf_tuned_predictions, testData_top$TARGET_energy)
+rf_tuned_r2 <- R2(rf_tuned_predictions, testData_top$TARGET_energy)
+
+cat("Tuned Random Forest - RMSE:", rf_tuned_rmse, "MAE:", rf_tuned_mae, "R^2:", rf_tuned_r2, "\n")
+```
+
+
+##### Hyperparameter Tuning for Gradient Boosting
+
+```{r}
+# Set up the grid for tuning
+gbmGrid <- expand.grid(interaction.depth = c(1, 3, 5),
+                       n.trees = (1:3)*50,
+                       shrinkage = c(0.01, 0.1),
+                       n.minobsinnode = 10)
+
+# Train the model using cross-validation
+set.seed(123)
+gbm_tuned <- train(TARGET_energy ~ ., data = trainData_top, method = "gbm", 
+                   trControl = control, tuneGrid = gbmGrid, verbose = FALSE)
+
+# Print the best tuning parameters
+print(gbm_tuned$bestTune)
+
+# Predict on test data
+gbm_tuned_predictions <- predict(gbm_tuned, newdata = testData_top)
+
+# Evaluate the tuned model
+gbm_tuned_rmse <- RMSE(gbm_tuned_predictions, testData_top$TARGET_energy)
+gbm_tuned_mae <- MAE(gbm_tuned_predictions, testData_top$TARGET_energy)
+gbm_tuned_r2 <- R2(gbm_tuned_predictions, testData_top$TARGET_energy)
+
+cat("Tuned Gradient Boosting - RMSE:", gbm_tuned_rmse, "MAE:", gbm_tuned_mae, "R^2:", gbm_tuned_r2, "\n")
+```
+#### Saving The Models
+```{r}
+
+# Save the tuned Random Forest model
+saveRDS(rf_tuned, file = "rf_tuned_model.rds")
+
+# Save the tuned Gradient Boosting model
+saveRDS(gbm_tuned, file = "gbm_tuned_model.rds")
+
+
+# Load the tuned Random Forest model
+rf_tuned <- readRDS(file = "rf_tuned_model.rds")
+
+# Load the tuned Gradient Boosting model
+gbm_tuned <- readRDS(file = "gbm_tuned_model.rds")
+
+# Predict on test data using loaded models
+rf_tuned_predictions <- predict(rf_tuned, newdata = testData_top)
+gbm_tuned_predictions <- predict(gbm_tuned, newdata = testData_top)
+
+# Evaluate the loaded models
+rf_tuned_rmse <- RMSE(rf_tuned_predictions, testData_top$TARGET_energy)
+rf_tuned_mae <- MAE(rf_tuned_predictions, testData_top$TARGET_energy)
+rf_tuned_r2 <- R2(rf_tuned_predictions, testData_top$TARGET_energy)
+cat("Tuned Random Forest - RMSE:", rf_tuned_rmse, "MAE:", rf_tuned_mae, "R^2:", rf_tuned_r2, "\n")
+
+gbm_tuned_rmse <- RMSE(gbm_tuned_predictions, testData_top$TARGET_energy)
+gbm_tuned_mae <- MAE(gbm_tuned_predictions, testData_top$TARGET_energy)
+gbm_tuned_r2 <- R2(gbm_tuned_predictions, testData_top$TARGET_energy)
+cat("Tuned Gradient Boosting - RMSE:", gbm_tuned_rmse, "MAE:", gbm_tuned_mae, "R^2:", gbm_tuned_r2, "\n")
+
+```
+
+### Summary
+
+By following these steps, we can train and evaluate multiple machine learning models to determine which one performs the best. After identifying the best-performing model, we can further optimize it through hyperparameter tuning. This process ensures that we build a robust and accurate predictive model for energy use.
+
+1. **Train Different Models**: Linear Regression, Random Forest, and Gradient Boosting.
+2. **Evaluate Models**: Using metrics like RMSE, MAE, and R^2.
+3. **Hyperparameter Tuning**: Optimize the best-performing model.
+4. **Model Interpretation and Analysis**: Draw meaningful conclusions from the model's performance and predictions.
+
+By completing these steps, we ensure that our model is well-tuned and provides accurate predictions for energy use.
+
+
