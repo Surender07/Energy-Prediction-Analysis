@@ -1,0 +1,146 @@
+### Rationale Behind Feature Engineering Choices
+
+The rationale for each feature engineering choice is based on the insights derived from the correlation analysis and the understanding of the problem domain. Here’s a detailed explanation:
+
+#### 1. **Time-based Features**
+   - **Hour of the Day, Day of the Week, Month:**
+     - **Rationale:** Energy consumption often follows daily and weekly patterns due to human activities and routines. For example, energy use might be higher during certain hours of the day (e.g., evenings) and might differ between weekdays and weekends. Including these features can help capture these temporal patterns.
+
+```{r}
+data$hour <- as.integer(format(data$date, "%H"))
+data$day_of_week <- as.integer(format(data$date, "%u"))
+data$month <- as.integer(format(data$date, "%m"))
+```
+
+#### 2. **Lagged Features**
+   - **Lagged Energy Use:**
+     - **Rationale:** Energy use at a given time might be influenced by its values at previous time steps due to the inertia of heating/cooling systems and other ongoing processes. Lagged features help capture this temporal dependency.
+
+```{r}
+library(dplyr)
+
+data <- data %>%
+  mutate(
+    TARGET_energy_lag1 = lag(TARGET_energy, 1),
+    TARGET_energy_lag24 = lag(TARGET_energy, 24)
+  )
+```
+
+#### 3. **Rolling Statistics**
+   - **Rolling Mean and Standard Deviation:**
+     - **Rationale:** Rolling statistics help capture short-term trends and variability in the data. For example, a sudden increase in rolling mean energy use might indicate a change in usage patterns or a faulty device.
+
+```{r}
+library(zoo)
+
+data <- data %>%
+  mutate(
+    TARGET_energy_rollmean_3 = rollmean(TARGET_energy, 3, fill = NA, align = "right"),
+    TARGET_energy_rollsd_3 = rollapply(TARGET_energy, 3, sd, fill = NA, align = "right"),
+    T1_rollmean_3 = rollmean(T1, 3, fill = NA, align = "right"),
+    T1_rollsd_3 = rollapply(T1, 3, sd, fill = NA, align = "right")
+  )
+```
+
+#### 4. **Interaction Features**
+   - **Interaction Between Temperature and Humidity:**
+     - **Rationale:** The correlation analysis showed a moderate to strong negative correlation between temperature and humidity in the same room. Interaction features can capture the combined effect of these variables on energy use.
+
+```{r}
+data <- data %>%
+  mutate(
+    T1_RH1_interaction = T1 * RH_1,
+    T2_RH2_interaction = T2 * RH_2,
+    T3_RH3_interaction = T3 * RH_3,
+    T4_RH4_interaction = T4 * RH_4,
+    T5_RH5_interaction = T5 * RH_5,
+    T6_RH6_interaction = T6 * RH_6,
+    T7_RH7_interaction = T7 * RH_7,
+    T8_RH8_interaction = T8 * RH_8,
+    T9_RH9_interaction = T9 * RH_9
+  )
+```
+
+#### 5. **Polynomial Features**
+   - **Polynomial Transformations:**
+     - **Rationale:** Polynomial features help capture non-linear relationships between variables. For instance, the effect of temperature on energy use might not be linear, and quadratic or cubic terms can model these complex relationships.
+
+```{r}
+data <- data %>%
+  mutate(
+    T1_squared = T1^2,
+    RH1_squared = RH_1^2,
+    T1_cubed = T1^3,
+    RH1_cubed = RH_1^3,
+    T2_squared = T2^2,
+    RH2_squared = RH_2^2,
+    T2_cubed = T2^3,
+    RH2_cubed = RH_2^3,
+    T3_squared = T3^2,
+    RH3_squared = RH_3^2,
+    T3_cubed = T3^3,
+    RH3_cubed = RH_3^3,
+    T4_squared = T4^2,
+    RH4_squared = RH_4^2,
+    T4_cubed = T4^3,
+    RH4_cubed = RH_4^3,
+    T5_squared = T5^2,
+    RH5_squared = RH_5^2,
+    T5_cubed = T5^3,
+    RH5_cubed = RH_5^3,
+    T6_squared = T6^2,
+    RH6_squared = RH_6^2,
+    T6_cubed = T6^3,
+    RH6_cubed = RH_6^3,
+    T7_squared = T7^2,
+    RH7_squared = RH_7^2,
+    T7_cubed = T7^3,
+    RH7_cubed = RH_7^3,
+    T8_squared = T8^2,
+    RH8_squared = RH_8^2,
+    T8_cubed = T8^3,
+    RH8_cubed = RH_8^3,
+    T9_squared = T9^2,
+    RH9_squared = RH_9^2,
+    T9_cubed = T9^3,
+    RH9_cubed = RH_9^3
+  )
+```
+
+#### 6. **Day/Night Indicator**
+   - **Binary Indicator for Day/Night:**
+     - **Rationale:** Energy usage patterns might differ between day and night due to human activity cycles and natural lighting. A binary indicator helps capture this variation.
+
+```{r}
+data <- data %>%
+  mutate(
+    is_day = ifelse(hour >= 6 & hour < 18, 1, 0)
+  )
+```
+
+### Summary
+
+These feature engineering steps are designed to enhance the predictive power of your models by incorporating domain knowledge and insights from the data. By adding time-based features, lagged features, rolling statistics, interaction features, polynomial features, and a day/night indicator, you can capture complex patterns and relationships that may improve model performance.
+
+### Next Steps
+
+1. **Data Cleaning:**
+   - Handle any missing values introduced during feature engineering.
+
+```{r}
+data <- na.omit(data)
+```
+
+2. **Feature Selection:**
+   - Identify the most important features using techniques like correlation analysis, feature importance from tree-based models, or mutual information.
+
+3. **Model Training:**
+   - Train various machine learning models using the enriched feature set and evaluate their performance.
+
+4. **Hyperparameter Tuning:**
+   - Optimize the hyperparameters of your models to improve their performance.
+
+5. **Model Evaluation:**
+   - Evaluate the models using appropriate metrics (e.g., RMSE, MAE) and select the best-performing model.
+
+By following these steps, you can enhance the predictive power of your models and gain deeper insights into the factors influencing energy consumption.
