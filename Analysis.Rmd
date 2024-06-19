@@ -403,3 +403,71 @@ Further analysis could include:
 
 By leveraging these insights, we can develop robust models to predict energy use and optimize energy consumption in low-energy buildings.
 
+```{r}
+install.packages("forecast")
+library(forecast)
+
+# Decompose energy use time series
+energy_ts <- ts(data$TARGET_energy, frequency=24) # Assuming hourly data
+decomposed <- stl(energy_ts, s.window="periodic")
+plot(decomposed)
+
+```
+### Critical Analysis
+
+The time series decomposition plot above visualizes the components of the energy use data over time. Here are the key observations:
+
+- **Data:**
+  - The raw energy use data shows significant fluctuations with frequent spikes, indicating variability in energy consumption.
+
+- **Seasonal:**
+  - The seasonal component captures the repeating patterns in the data. The plot shows a strong and regular seasonal pattern, suggesting that there are consistent daily or weekly cycles in energy use.
+
+- **Trend:**
+  - The trend component shows the long-term direction of the energy use. There appears to be an increasing trend over time, indicating that overall energy consumption is rising.
+
+- **Remainder:**
+  - The remainder component captures the residuals after removing the seasonal and trend components. This plot shows the noise and random fluctuations in the data. The high variability in the remainder indicates that there are other unexplained factors influencing energy use.
+
+### Conclusion
+
+The decomposition plot provides valuable insights into the underlying patterns in the energy use data:
+- The strong seasonal component suggests regular cycles, which could be leveraged for predictive modeling.
+- The increasing trend indicates a long-term rise in energy consumption, which might require addressing underlying causes.
+- The high variability in the remainder component suggests the presence of additional factors affecting energy use, warranting further investigation.
+
+```{r}
+# Lagged correlation
+library(dplyr)
+lagged_data <- data %>%
+  mutate(TARGET_energy_lag1 = lag(TARGET_energy, 1),
+         TARGET_energy_lag24 = lag(TARGET_energy, 24)) # Example lags
+
+cor(lagged_data[, c("TARGET_energy", "TARGET_energy_lag1", "TARGET_energy_lag24")], use="complete.obs")
+
+library(ggplot2)
+install.packages("reshape2")
+library(reshape2)
+
+# Heatmap of correlation matrix
+cor_matrix <- cor(data[, sapply(data, is.numeric)], use="complete.obs")
+melted_cor_matrix <- melt(cor_matrix)
+ggplot(data = melted_cor_matrix, aes(x=Var1, y=Var2, fill=value)) +
+  geom_tile() +
+  scale_fill_gradient2(low="blue", high="red", mid="white", midpoint=0) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(title="Correlation Heatmap")
+
+```
+```{r}
+install.packages("dtwclust")
+library(dtwclust)
+
+# Example clustering on temperature variables
+temp_matrix <- as.matrix(data %>% select(T1, T2, T3, T4, T5, T6, T7, T8, T9))
+temp_dist <- dist(temp_matrix, method="DTW")
+temp_cluster <- hclust(temp_dist)
+plot(temp_cluster, main="Hierarchical Clustering of Temperature Variables")
+
+```
+
