@@ -179,3 +179,10 @@ ggsave("feature_importance.png", width = 18, height = 20)
 ### Summary
 
 By following these steps, we can effectively engineer features based on domain knowledge and insights from the data. Evaluating feature importance using a Random Forest model helps us identify the most predictive features, thereby simplifying the model and potentially improving its performance. This comprehensive approach ensures that we leverage all relevant information from the data to build a robust predictive model.
+
+```{r}
+# Display the top features
+print(head(importance_df, 10))
+
+```
+
