@@ -4,6 +4,7 @@ output:
   word_document: default
   pdf_document: default
 ---
+# Exploratory Data Analysis
 ```{r}
 data <- read.csv("UCI-electricity/UCI_data.csv")
 
@@ -208,7 +209,7 @@ mtext("Histograms of Additional Numerical Variables", outer = TRUE, line = -42, 
 cor_matrix <- cor(data[, sapply(data, is.numeric)], use="complete.obs")
 
 # Install and load the corrplot package
-install.packages("corrplot")
+#install.packages("corrplot")
 library(corrplot)
 
 # Visualize the correlation matrix
@@ -246,8 +247,8 @@ These observations provide insights into how different environmental variables i
 
 ```{r Pair Plots}
 # Install necessary packages if not already installed
-install.packages("GGally")
-install.packages("dplyr")
+#install.packages("GGally")
+#install.packages("dplyr")
 
 # Load the packages
 library(GGally)
@@ -301,9 +302,9 @@ boxplot(data$RH_out, main="Outside (Chievres)", col="grey")
 
 
 ```{r Time Series Analysis}
-install.packages("ggplot2")
-install.packages("dplyr")
-install.packages("tidyr")
+#install.packages("ggplot2")
+#install.packages("dplyr")
+#install.packages("tidyr")
 
 # Load the packages
 library(ggplot2)
@@ -404,7 +405,7 @@ Further analysis could include:
 By leveraging these insights, we can develop robust models to predict energy use and optimize energy consumption in low-energy buildings.
 
 ```{r}
-install.packages("forecast")
+#install.packages("forecast")
 library(forecast)
 
 # Decompose energy use time series
@@ -446,7 +447,7 @@ lagged_data <- data %>%
 cor(lagged_data[, c("TARGET_energy", "TARGET_energy_lag1", "TARGET_energy_lag24")], use="complete.obs")
 
 library(ggplot2)
-install.packages("reshape2")
+#install.packages("reshape2")
 library(reshape2)
 
 # Heatmap of correlation matrix
@@ -459,15 +460,53 @@ ggplot(data = melted_cor_matrix, aes(x=Var1, y=Var2, fill=value)) +
   labs(title="Correlation Heatmap")
 
 ```
-```{r}
-install.packages("dtwclust")
-library(dtwclust)
+## Critical Analysis
 
-# Example clustering on temperature variables
-temp_matrix <- as.matrix(data %>% select(T1, T2, T3, T4, T5, T6, T7, T8, T9))
-temp_dist <- dist(temp_matrix, method="DTW")
-temp_cluster <- hclust(temp_dist)
-plot(temp_cluster, main="Hierarchical Clustering of Temperature Variables")
+### Correlation Heatmap
 
-```
+The correlation heatmap above visualizes the relationships between various numerical variables in the dataset. Here are the key observations:
+
+- **Strong Positive Correlations:**
+  - **Temperature Variables (T1 to T9, T_out):** These temperature variables are strongly positively correlated with each other, indicating that temperatures across different rooms in the house tend to increase and decrease together.
+  - **Humidity Variables (RH_1 to RH_9):** These humidity variables also show strong positive correlations with each other, suggesting that humidity levels across different rooms tend to move in tandem.
+
+- **Negative Correlations:**
+  - **Temperature and Humidity:** There are moderate to strong negative correlations between temperature and humidity in the same room (e.g., T1 and RH_1, T2 and RH_2), indicating that as temperature increases, humidity decreases, and vice versa.
+
+- **External Temperature (T_out):**
+  - **T_out and Internal Temperatures:** External temperature (T_out) has moderate positive correlations with internal temperatures, suggesting that changes in external temperature influence internal temperatures.
+
+- **Pressure (Press_mm_hg):**
+  - **Pressure and Humidity:** There is a slight negative correlation between pressure and humidity levels (RH_out), indicating that higher pressure may be associated with lower humidity levels.
+
+- **Wind Speed (Windspeed):**
+  - **Windspeed and Temperature:** Wind speed shows slight negative correlations with internal temperatures, suggesting that higher wind speeds might slightly reduce indoor temperatures.
+
+- **Visibility:**
+  - **Visibility and External Variables:** Visibility shows slight positive correlations with external temperature and slight negative correlations with external humidity.
+
+- **Energy Use (TARGET_energy):**
+  - **Weak Correlations:** Energy use (TARGET_energy) shows weak correlations with most other variables, indicating that other factors might be influencing energy consumption more strongly.
+
+### Lagged Correlation Analysis
+
+The table below shows the correlation between energy use and its lagged values:
+
+|                    | TARGET_energy | TARGET_energy_lag1 | TARGET_energy_lag24 |
+|--------------------|----------------|--------------------|---------------------|
+| TARGET_energy      | 1.000000000    | 0.005404513        | -0.012206256        |
+| TARGET_energy_lag1 | 0.005404513    | 1.000000000        | 0.007792859         |
+| TARGET_energy_lag24| -0.012206256   | 0.007792859        | 1.000000000         |
+
+**Observations:**
+- **Weak Correlations with Lagged Values:**
+  - The correlation between current energy use and energy use lagged by 1 hour (TARGET_energy_lag1) is very weak (0.005).
+  - The correlation between current energy use and energy use lagged by 24 hours (TARGET_energy_lag24) is also very weak (-0.012).
+
+### Conclusion
+
+The correlation heatmap and lagged correlation analysis provide valuable insights into the relationships between different variables in the dataset:
+- The strong correlations among temperature variables and among humidity variables indicate consistent environmental conditions within the house.
+- The weak correlations between energy use and its lagged values suggest that current energy consumption is not strongly dependent on past values, indicating the influence of other factors.
+- The negative correlations between temperature and humidity highlight the interplay between these two environmental factors.
 
