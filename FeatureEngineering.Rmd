@@ -1,0 +1,188 @@
+### Rationale Behind Our Feature Engineering and Feature Importance Evaluation
+
+Feature engineering and evaluating feature importance are critical steps in building a robust predictive model. Here’s a detailed explanation of why we performed these steps and the complete code to achieve them.
+
+#### Rationale
+
+1. **Feature Engineering:**
+   - **Time-based Features:** Adding features like the hour of the day, day of the week, and month helps capture temporal patterns in energy usage.
+   - **Lagged Features:** Including previous time steps’ energy usage can capture temporal dependencies.
+   - **Rolling Statistics:** Calculating rolling means and standard deviations helps capture short-term trends and variability.
+   - **Interaction Features:** Interaction terms between temperature and humidity can capture combined effects that are not evident when considering each variable independently.
+   - **Polynomial Features:** Polynomial transformations help capture non-linear relationships between features and the target variable.
+   - **Day/Night Indicator:** Adding a binary indicator for day and night can help model different energy usage patterns during these periods.
+
+2. **Feature Importance Evaluation:**
+   - **Random Forest Model:** Using a Random Forest model helps assess the importance of each feature based on how much they reduce the impurity in the trees. This provides insights into which features are most predictive of the target variable.
+
+### Complete Code Implementation
+
+#### Step 1: Install and Load Necessary Libraries
+
+```{r}
+# Install and load necessary libraries
+install.packages("randomForest")
+install.packages("ggplot2")
+install.packages("caret")
+install.packages("dplyr")
+install.packages("zoo")
+
+library(randomForest)
+library(ggplot2)
+library(caret)
+library(dplyr)
+library(zoo)
+```
+
+#### Step 2: Load and Prepare Data
+
+We assume `data` is already loaded and `TARGET_energy` is the target variable.
+
+```{r}
+# Convert the 'date' column to datetime format
+data$date <- as.POSIXct(data$date, format="%Y-%m-%d %H:%M:%S")
+
+# Add Time-based Features
+data$hour <- as.integer(format(data$date, "%H"))
+data$day_of_week <- as.integer(format(data$date, "%u"))
+data$month <- as.integer(format(data$date, "%m"))
+```
+
+#### Step 3: Feature Engineering
+
+```{r}
+# Add Lagged Features
+data <- data %>%
+  mutate(
+    TARGET_energy_lag1 = lag(TARGET_energy, 1),
+    TARGET_energy_lag24 = lag(TARGET_energy, 24)
+  )
+
+# Add Rolling Statistics
+data <- data %>%
+  mutate(
+    TARGET_energy_rollmean_3 = rollmean(TARGET_energy, 3, fill = NA, align = "right"),
+    TARGET_energy_rollsd_3 = rollapply(TARGET_energy, 3, sd, fill = NA, align = "right"),
+    T1_rollmean_3 = rollmean(T1, 3, fill = NA, align = "right"),
+    T1_rollsd_3 = rollapply(T1, 3, sd, fill = NA, align = "right")
+  )
+
+# Add Interaction Features
+data <- data %>%
+  mutate(
+    T1_RH1_interaction = T1 * RH_1,
+    T2_RH2_interaction = T2 * RH_2,
+    T3_RH3_interaction = T3 * RH_3,
+    T4_RH4_interaction = T4 * RH_4,
+    T5_RH5_interaction = T5 * RH_5,
+    T6_RH6_interaction = T6 * RH_6,
+    T7_RH7_interaction = T7 * RH_7,
+    T8_RH8_interaction = T8 * RH_8,
+    T9_RH9_interaction = T9 * RH_9
+  )
+
+# Add Polynomial Features
+data <- data %>%
+  mutate(
+    T1_squared = T1^2,
+    RH1_squared = RH_1^2,
+    T1_cubed = T1^3,
+    RH1_cubed = RH_1^3,
+    T2_squared = T2^2,
+    RH2_squared = RH_2^2,
+    T2_cubed = T2^3,
+    RH2_cubed = RH_2^3,
+    T3_squared = T3^2,
+    RH3_squared = RH_3^2,
+    T3_cubed = T3^3,
+    RH3_cubed = RH_3^3,
+    T4_squared = T4^2,
+    RH4_squared = RH_4^2,
+    T4_cubed = T4^3,
+    RH4_cubed = RH_4^3,
+    T5_squared = T5^2,
+    RH5_squared = RH_5^2,
+    T5_cubed = T5^3,
+    RH5_cubed = RH_5^3,
+    T6_squared = T6^2,
+    RH6_squared = RH_6^2,
+    T6_cubed = T6^3,
+    RH6_cubed = RH_6^3,
+    T7_squared = T7^2,
+    RH7_squared = RH_7^2,
+    T7_cubed = T7^3,
+    RH7_cubed = RH_7^3,
+    T8_squared = T8^2,
+    RH8_squared = RH_8^2,
+    T8_cubed = T8^3,
+    RH8_cubed = RH_8^3,
+    T9_squared = T9^2,
+    RH9_squared = RH_9^2,
+    T9_cubed = T9^3,
+    RH9_cubed = RH_9^3
+  )
+
+# Add Day/Night Indicator
+data <- data %>%
+  mutate(
+    is_day = ifelse(hour >= 6 & hour < 18, 1, 0)
+  )
+
+# Check for missing values in the engineered data
+colSums(is.na(data))
+
+# Handle missing values (if any) by removing them
+data <- na.omit(data)
+```
+
+#### Step 4: Evaluate Feature Importance Using Random Forest
+
+```{r}
+# Split the cleaned data into training and testing sets
+set.seed(123)
+trainIndex <- createDataPartition(data$TARGET_energy, p = .8, 
+                                  list = FALSE, 
+                                  times = 1)
+trainData <- data[trainIndex,]
+testData <- data[-trainIndex,]
+
+# Ensure the target variable is numeric
+trainData$TARGET_energy <- as.numeric(trainData$TARGET_energy)
+testData$TARGET_energy <- as.numeric(testData$TARGET_energy)
+
+# Train a Random Forest model
+set.seed(2024)
+rf_model <- randomForest(TARGET_energy ~ ., data = trainData, importance = TRUE, ntree = 100)
+
+# Print the model summary
+print(rf_model)
+
+# Get feature importance
+importance <- importance(rf_model)
+importance_df <- data.frame(Feature = rownames(importance), Importance = importance[,1])
+
+# Sort by importance
+importance_df <- importance_df[order(-importance_df$Importance), ]
+
+# Plot feature importance
+ggplot(importance_df, aes(x = reorder(Feature, Importance), y = Importance)) +
+  geom_bar(stat = 'identity') +
+  coord_flip() +
+  theme_minimal() +
+  labs(title = "Feature Importance", x = "Feature", y = "Importance")
+
+# Save the plot as a bigger image
+ggsave("feature_importance.png", width = 18, height = 20)
+
+```
+
+### Summary
+
+By following these steps, we can effectively engineer features based on domain knowledge and insights from the data. Evaluating feature importance using a Random Forest model helps us identify the most predictive features, thereby simplifying the model and potentially improving its performance. This comprehensive approach ensures that we leverage all relevant information from the data to build a robust predictive model.
+
+```{r}
+# Display the top features
+print(head(importance_df, 10))
+
+```
+
