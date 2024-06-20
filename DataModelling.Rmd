@@ -1,3 +1,10 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+## Data Modelling - Baseline Models
+
 Now that we've completed feature engineering and feature selection, the next steps involve model training, evaluation, and possibly hyperparameter tuning to optimize model performance.
 
 ### Next Steps
@@ -216,4 +223,6 @@ By following these steps, we can train and evaluate multiple machine learning mo
 
 By completing these steps, we ensure that our model is well-tuned and provides accurate predictions for energy use.
 
+
+## Data Modelling - Advanced Models
 
