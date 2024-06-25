@@ -126,78 +126,42 @@ cat("Gradient Boosting - RMSE:", gbm_rmse, "MAE:", gbm_mae, "R^2:", gbm_r2, "\n"
 If Random Forest or Gradient Boosting shows the best performance, we can perform hyperparameter tuning for these models.
 
 ##### Hyperparameter Tuning for Random Forest
+I will Comment Out the Follwoing Code block because I have performed hyperparameter tuning and saved the model. Hence, in the following sections, I will run it again print out metrics. 
 
 ```{r}
-# Set up the control function for training
-control <- trainControl(method = "cv", number = 5)
-tunegrid <- expand.grid(.mtry = c(2, 3, 4, 5, 6, 7))
 
-# Train the model using cross-validation
-set.seed(123)
-rf_tuned <- train(TARGET_energy ~ ., data = trainData_top, method = "rf", 
-                  trControl = control, tuneGrid = tunegrid)
-
-# Print the best tuning parameter
-print(rf_tuned$bestTune)
-
-# Predict on test data
-rf_tuned_predictions <- predict(rf_tuned, newdata = testData_top)
-
-# Evaluate the tuned model
-rf_tuned_rmse <- RMSE(rf_tuned_predictions, testData_top$TARGET_energy)
-rf_tuned_mae <- MAE(rf_tuned_predictions, testData_top$TARGET_energy)
-rf_tuned_r2 <- R2(rf_tuned_predictions, testData_top$TARGET_energy)
-
-cat("Tuned Random Forest - RMSE:", rf_tuned_rmse, "MAE:", rf_tuned_mae, "R^2:", rf_tuned_r2, "\n")
-```
-
-
-##### Hyperparameter Tuning for Gradient Boosting
-
-```{r}
-# Set up the grid for tuning
-gbmGrid <- expand.grid(interaction.depth = c(1, 3, 5),
-                       n.trees = (1:3)*50,
-                       shrinkage = c(0.01, 0.1),
-                       n.minobsinnode = 10)
-
-# Train the model using cross-validation
-set.seed(123)
-gbm_tuned <- train(TARGET_energy ~ ., data = trainData_top, method = "gbm", 
-                   trControl = control, tuneGrid = gbmGrid, verbose = FALSE)
-
-# Print the best tuning parameters
-print(gbm_tuned$bestTune)
-
-# Predict on test data
-gbm_tuned_predictions <- predict(gbm_tuned, newdata = testData_top)
-
-# Evaluate the tuned model
-gbm_tuned_rmse <- RMSE(gbm_tuned_predictions, testData_top$TARGET_energy)
-gbm_tuned_mae <- MAE(gbm_tuned_predictions, testData_top$TARGET_energy)
-gbm_tuned_r2 <- R2(gbm_tuned_predictions, testData_top$TARGET_energy)
-
-cat("Tuned Gradient Boosting - RMSE:", gbm_tuned_rmse, "MAE:", gbm_tuned_mae, "R^2:", gbm_tuned_r2, "\n")
-```
-#### Saving The Models
-```{r}
+# # Set up the control function for training
+# control <- trainControl(method = "cv", number = 5)
+# tunegrid <- expand.grid(.mtry = c(2, 3, 4, 5, 6, 7))
+# 
+# # Train the model using cross-validation
+# set.seed(123)
+# rf_tuned <- train(TARGET_energy ~ ., data = trainData_top, method = "rf", 
+#                   trControl = control, tuneGrid = tunegrid)
+# 
+# # Print the best tuning parameter
+# print(rf_tuned$bestTune)
+# 
+# # Predict on test data
+# rf_tuned_predictions <- predict(rf_tuned, newdata = testData_top)
+# 
+# # Evaluate the tuned model
+# rf_tuned_rmse <- RMSE(rf_tuned_predictions, testData_top$TARGET_energy)
+# rf_tuned_mae <- MAE(rf_tuned_predictions, testData_top$TARGET_energy)
+# rf_tuned_r2 <- R2(rf_tuned_predictions, testData_top$TARGET_energy)
+# 
+# cat("Tuned Random Forest - RMSE:", rf_tuned_rmse, "MAE:", rf_tuned_mae, "R^2:", rf_tuned_r2, "\n")
+# Load the tuned Random Forest model
 
 # Save the tuned Random Forest model
-saveRDS(rf_tuned, file = "rf_tuned_model.rds")
-
-# Save the tuned Gradient Boosting model
-saveRDS(gbm_tuned, file = "gbm_tuned_model.rds")
+#saveRDS(rf_tuned, file = "Models/rf_tuned_model.rds")
 
 
-# Load the tuned Random Forest model
-rf_tuned <- readRDS(file = "rf_tuned_model.rds")
+rf_tuned <- readRDS(file = "Models/rf_tuned_model.rds")
 
-# Load the tuned Gradient Boosting model
-gbm_tuned <- readRDS(file = "gbm_tuned_model.rds")
 
 # Predict on test data using loaded models
 rf_tuned_predictions <- predict(rf_tuned, newdata = testData_top)
-gbm_tuned_predictions <- predict(gbm_tuned, newdata = testData_top)
 
 # Evaluate the loaded models
 rf_tuned_rmse <- RMSE(rf_tuned_predictions, testData_top$TARGET_energy)
@@ -205,24 +169,516 @@ rf_tuned_mae <- MAE(rf_tuned_predictions, testData_top$TARGET_energy)
 rf_tuned_r2 <- R2(rf_tuned_predictions, testData_top$TARGET_energy)
 cat("Tuned Random Forest - RMSE:", rf_tuned_rmse, "MAE:", rf_tuned_mae, "R^2:", rf_tuned_r2, "\n")
 
+```
+
+
+##### Hyperparameter Tuning for Gradient Boosting
+
+```{r}
+# # Set up the grid for tuning
+# gbmGrid <- expand.grid(interaction.depth = c(1, 3, 5),
+#                        n.trees = (1:3)*50,
+#                        shrinkage = c(0.01, 0.1),
+#                        n.minobsinnode = 10)
+# 
+# # Train the model using cross-validation
+# set.seed(123)
+# gbm_tuned <- train(TARGET_energy ~ ., data = trainData_top, method = "gbm", 
+#                    trControl = control, tuneGrid = gbmGrid, verbose = FALSE)
+# 
+# # Print the best tuning parameters
+# print(gbm_tuned$bestTune)
+# 
+# # Predict on test data
+# gbm_tuned_predictions <- predict(gbm_tuned, newdata = testData_top)
+# 
+# # Evaluate the tuned model
+# gbm_tuned_rmse <- RMSE(gbm_tuned_predictions, testData_top$TARGET_energy)
+# gbm_tuned_mae <- MAE(gbm_tuned_predictions, testData_top$TARGET_energy)
+# gbm_tuned_r2 <- R2(gbm_tuned_predictions, testData_top$TARGET_energy)
+# 
+# cat("Tuned Gradient Boosting - RMSE:", gbm_tuned_rmse, "MAE:", gbm_tuned_mae, "R^2:", gbm_tuned_r2, "\n")
+
+# Save the tuned Gradient Boosting model
+saveRDS(gbm_tuned, file = "Models/gbm_tuned_model.rds")
+
+
+
+
+# Load the tuned Gradient Boosting model
+gbm_tuned <- readRDS(file = "Models/gbm_tuned_model.rds")
+
+gbm_tuned_predictions <- predict(gbm_tuned, newdata = testData_top)
+
+
 gbm_tuned_rmse <- RMSE(gbm_tuned_predictions, testData_top$TARGET_energy)
 gbm_tuned_mae <- MAE(gbm_tuned_predictions, testData_top$TARGET_energy)
 gbm_tuned_r2 <- R2(gbm_tuned_predictions, testData_top$TARGET_energy)
 cat("Tuned Gradient Boosting - RMSE:", gbm_tuned_rmse, "MAE:", gbm_tuned_mae, "R^2:", gbm_tuned_r2, "\n")
+```
+
+
+=========================================================
+
+## Data Modelling - Advanced Models
+
+### ARIMA(AutoRegressive Integrated Moving Average)
+
+
+```{r}
+# Install and load necessary packages
+#install.packages("keras")
+library(keras)
+
+# Install Keras and TensorFlow
+#install_keras()
+
+# Assuming data is your dataset and TARGET_energy is your target variable
+# Ensure the 'date' column is in datetime format
+data$date <- as.POSIXct(data$date, format="%Y-%m-%d %H:%M:%S")
+
+# Normalize the data
+normalize <- function(x) {
+  return ((x - min(x)) / (max(x) - min(x)))
+}
+
+normalized_data <- normalize(data$TARGET_energy)
+ts_data <- ts(normalized_data, frequency = 24) # Assuming hourly data
+
+# Split the data into training and testing sets
+train_size <- floor(0.8 * length(ts_data))
+train_ts <- ts_data[1:train_size]
+test_ts <- ts_data[(train_size + 1):length(ts_data)]
+
+# Convert to matrix format for LSTM
+x_train <- array(data = train_ts[1:(length(train_ts) - 1)], dim = c(length(train_ts) - 1, 1, 1))
+y_train <- array(data = train_ts[2:length(train_ts)], dim = c(length(train_ts) - 1, 1))
+x_test <- array(data = test_ts[1:(length(test_ts) - 1)], dim = c(length(test_ts) - 1, 1, 1))
+y_test <- array(data = test_ts[2:length(test_ts)], dim = c(length(test_ts) - 1, 1))
+
+# Define the LSTM model
+model <- keras_model_sequential() %>%
+  layer_lstm(units = 50, input_shape = c(1, 1), return_sequences = TRUE) %>%
+  layer_lstm(units = 50, return_sequences = FALSE) %>%
+  layer_dense(units = 1)
+
+model %>% compile(
+  loss = 'mean_squared_error',
+  optimizer = 'adam'
+)
+
+# Train the model
+history <- model %>% fit(
+  x_train, y_train,
+  epochs = 50,
+  batch_size = 1,
+  validation_data = list(x_test, y_test),
+  verbose = 2
+)
+
+# Make predictions
+train_predict <- model %>% predict(x_train)
+test_predict <- model %>% predict(x_test)
+
+# Inverse the normalization
+inverse_normalize <- function(x, orig_data) {
+  return (x * (max(orig_data) - min(orig_data)) + min(orig_data))
+}
+
+train_predict <- inverse_normalize(train_predict, data$TARGET_energy)
+test_predict <- inverse_normalize(test_predict, data$TARGET_energy)
+train_ts <- inverse_normalize(train_ts, data$TARGET_energy)
+test_ts <- inverse_normalize(test_ts, data$TARGET_energy)
+
+# Evaluate the model
+lstm_rmse <- sqrt(mean((test_predict - test_ts[2:length(test_ts)])^2))
+lstm_mae <- mean(abs(test_predict - test_ts[2:length(test_ts)]))
+lstm_r2 <- 1 - sum((test_predict - test_ts[2:length(test_ts)])^2) / sum((test_ts[2:length(test_ts)] - mean(test_ts[2:length(test_ts)]))^2)
+
+cat("LSTM - RMSE:", lstm_rmse, "MAE:", lstm_mae, "R^2:", lstm_r2, "\n")
+```
+```{r}
+# Install and load necessary packages
+install.packages("keras")
+library(keras)
+library(dplyr)
+
+# Assuming data is your dataset and TARGET_energy is your target variable
+# Ensure the 'date' column is in datetime format
+data$date <- as.POSIXct(data$date, format="%Y-%m-%d %H:%M:%S")
+
+# Feature Engineering: Adding lagged features and rolling statistics
+data <- data %>%
+  mutate(
+    lag1 = lag(TARGET_energy, 1),
+    lag2 = lag(TARGET_energy, 2),
+    lag3 = lag(TARGET_energy, 3),
+    rollmean3 = zoo::rollmean(TARGET_energy, 3, fill = NA),
+    rollmean6 = zoo::rollmean(TARGET_energy, 6, fill = NA),
+    rollmean12 = zoo::rollmean(TARGET_energy, 12, fill = NA)
+  ) %>%
+  na.omit()
+
+# Normalize the data
+normalize <- function(x) {
+  return ((x - min(x)) / (max(x) - min(x)))
+}
+
+inverse_normalize <- function(x, orig_data) {
+  return (x * (max(orig_data) - min(orig_data)) + min(orig_data))
+}
+
+# Apply normalization
+data_normalized <- data %>%
+  mutate_at(vars(TARGET_energy, lag1, lag2, lag3, rollmean3, rollmean6, rollmean12), normalize)
+
+# Prepare the time series data
+ts_data <- ts(data_normalized$TARGET_energy, frequency = 24) # Assuming hourly data
+
+# Split the data into training and testing sets
+train_size <- floor(0.8 * nrow(data_normalized))
+train_data <- data_normalized[1:train_size, ]
+test_data <- data_normalized[(train_size + 1):nrow(data_normalized), ]
+
+# Convert to matrix format for LSTM
+x_train <- array(data = as.matrix(train_data %>% select(lag1, lag2, lag3, rollmean3, rollmean6, rollmean12)), dim = c(nrow(train_data), 1, 6))
+y_train <- array(data = train_data$TARGET_energy, dim = c(nrow(train_data), 1))
+x_test <- array(data = as.matrix(test_data %>% select(lag1, lag2, lag3, rollmean3, rollmean6, rollmean12)), dim = c(nrow(test_data), 1, 6))
+y_test <- array(data = test_data$TARGET_energy, dim = c(nrow(test_data), 1))
+
+# Define the LSTM model with hyperparameter tuning
+model <- keras_model_sequential() %>%
+  layer_lstm(units = 100, input_shape = c(1, 6), return_sequences = TRUE, dropout = 0.2, recurrent_dropout = 0.2) %>%
+  layer_lstm(units = 100, return_sequences = FALSE, dropout = 0.2, recurrent_dropout = 0.2) %>%
+  layer_dense(units = 1)
+
+model %>% compile(
+  loss = 'mean_squared_error',
+  optimizer = optimizer_adam(learning_rate = 0.001)
+)
+
+# Train the model with increased epochs and batch size
+history <- model %>% fit(
+  x_train, y_train,
+  epochs = 100,
+  batch_size = 32,
+  validation_data = list(x_test, y_test),
+  verbose = 2
+)
+
+# Make predictions
+train_predict <- model %>% predict(x_train)
+test_predict <- model %>% predict(x_test)
+
+# Inverse the normalization
+train_predict <- inverse_normalize(train_predict, data$TARGET_energy)
+test_predict <- inverse_normalize(test_predict, data$TARGET_energy)
+train_actual <- inverse_normalize(y_train, data$TARGET_energy)
+test_actual <- inverse_normalize(y_test, data$TARGET_energy)
+
+# Evaluate the model
+lstm_rmse <- sqrt(mean((test_predict - test_actual)^2))
+lstm_mae <- mean(abs(test_predict - test_actual))
+lstm_r2 <- 1 - sum((test_predict - test_actual)^2) / sum((test_actual - mean(test_actual))^2)
+
+cat("LSTM - RMSE:", lstm_rmse, "MAE:", lstm_mae, "R^2:", lstm_r2, "\n")
+
+
+```
+```{r LSTM Hyperparameter tuning}
+# # Install and load necessary packages
+# install.packages("keras")
+# install.packages("zoo")
+# library(keras)
+# library(dplyr)
+# library(zoo)
+# 
+# # Assuming data is your dataset and TARGET_energy is your target variable
+# # Ensure the 'date' column is in datetime format
+# data$date <- as.POSIXct(data$date, format="%Y-%m-%d %H:%M:%S")
+# 
+# # Feature Engineering: Adding lagged features and rolling statistics
+# data <- data %>%
+#   mutate(
+#     lag1 = lag(TARGET_energy, 1),
+#     lag2 = lag(TARGET_energy, 2),
+#     lag3 = lag(TARGET_energy, 3),
+#     rollmean3 = zoo::rollmean(TARGET_energy, 3, fill = NA),
+#     rollmean6 = zoo::rollmean(TARGET_energy, 6, fill = NA),
+#     rollmean12 = zoo::rollmean(TARGET_energy, 12, fill = NA)
+#   ) %>%
+#   na.omit()
+# 
+# # Normalize the data
+# normalize <- function(x) {
+#   return ((x - min(x)) / (max(x) - min(x)))
+# }
+# 
+# inverse_normalize <- function(x, orig_data) {
+#   return (x * (max(orig_data) - min(orig_data)) + min(orig_data))
+# }
+# 
+# # Apply normalization
+# data_normalized <- data %>%
+#   mutate_at(vars(TARGET_energy, lag1, lag2, lag3, rollmean3, rollmean6, rollmean12), normalize)
+# 
+# # Prepare the time series data
+# ts_data <- ts(data_normalized$TARGET_energy, frequency = 24) # Assuming hourly data
+# 
+# # Split the data into training and testing sets
+# train_size <- floor(0.8 * nrow(data_normalized))
+# train_data <- data_normalized[1:train_size, ]
+# test_data <- data_normalized[(train_size + 1):nrow(data_normalized), ]
+# 
+# # Convert to matrix format for LSTM
+# x_train <- array(data = as.matrix(train_data %>% select(lag1, lag2, lag3, rollmean3, rollmean6, rollmean12)), dim = c(nrow(train_data), 1, 6))
+# y_train <- array(data = train_data$TARGET_energy, dim = c(nrow(train_data), 1))
+# x_test <- array(data = as.matrix(test_data %>% select(lag1, lag2, lag3, rollmean3, rollmean6, rollmean12)), dim = c(nrow(test_data), 1, 6))
+# y_test <- array(data = test_data$TARGET_energy, dim = c(nrow(test_data), 1))
+# 
+# # Define the LSTM model with hyperparameter tuning
+# model <- keras_model_sequential() %>%
+#   layer_lstm(units = 100, input_shape = c(1, 6), return_sequences = TRUE, dropout = 0.2, recurrent_dropout = 0.2) %>%
+#   layer_lstm(units = 100, return_sequences = FALSE, dropout = 0.2, recurrent_dropout = 0.2) %>%
+#   layer_dense(units = 1)
+# 
+# model %>% compile(
+#   loss = 'mean_squared_error',
+#   optimizer = optimizer_adam(learning_rate = 0.001)
+# )
+# 
+# # Train the model with increased epochs and batch size
+# history <- model %>% fit(
+#   x_train, y_train,
+#   epochs = 100,
+#   batch_size = 32,
+#   validation_data = list(x_test, y_test),
+#   verbose = 2
+# )
+# 
+# # Make predictions
+# train_predict <- model %>% predict(x_train)
+# test_predict <- model %>% predict(x_test)
+# 
+# # Inverse the normalization
+# train_predict <- inverse_normalize(train_predict, data$TARGET_energy)
+# test_predict <- inverse_normalize(test_predict, data$TARGET_energy)
+# train_actual <- inverse_normalize(y_train, data$TARGET_energy)
+# test_actual <- inverse_normalize(y_test, data$TARGET_energy)
+# 
+# # Evaluate the model
+# lstm_rmse <- sqrt(mean((test_predict - test_actual)^2))
+# lstm_mae <- mean(abs(test_predict - test_actual))
+# lstm_r2 <- 1 - sum((test_predict - test_actual)^2) / sum((test_actual - mean(test_actual))^2)
+# 
+# cat("LSTM - RMSE:", lstm_rmse, "MAE:", lstm_mae, "R^2:", lstm_r2, "\n")
 
 ```
 
-### Summary
-
-By following these steps, we can train and evaluate multiple machine learning models to determine which one performs the best. After identifying the best-performing model, we can further optimize it through hyperparameter tuning. This process ensures that we build a robust and accurate predictive model for energy use.
-
-1. **Train Different Models**: Linear Regression, Random Forest, and Gradient Boosting.
-2. **Evaluate Models**: Using metrics like RMSE, MAE, and R^2.
-3. **Hyperparameter Tuning**: Optimize the best-performing model.
-4. **Model Interpretation and Analysis**: Draw meaningful conclusions from the model's performance and predictions.
-
-By completing these steps, we ensure that our model is well-tuned and provides accurate predictions for energy use.
 
 
-## Data Modelling - Advanced Models
+```{r}
+model %>% save_model_hdf5("Models/lstm_energy_model.h5")
+model <- load_model_hdf5("Models/lstm_energy_model.h5")
+train_predict <- model %>% predict(x_train)
+test_predict <- model %>% predict(x_test)
+
+train_predict <- inverse_normalize(train_predict, data$TARGET_energy)
+test_predict <- inverse_normalize(test_predict, data$TARGET_energy)
+train_actual <- inverse_normalize(y_train, data$TARGET_energy)
+test_actual <- inverse_normalize(y_test, data$TARGET_energy)
+
+lstm_rmse <- sqrt(mean((test_predict - test_actual)^2))
+lstm_mae <- mean(abs(test_predict - test_actual))
+lstm_r2 <- 1 - sum((test_predict - test_actual)^2) / sum((test_actual - mean(test_actual))^2)
+
+cat("LSTM - RMSE:", lstm_rmse, "MAE:", lstm_mae, "R^2:", lstm_r2, "\n")
+
+```
+```{r MLP}
+# Install and load necessary packages
+install.packages("keras")
+install.packages("zoo")
+library(keras)
+library(dplyr)
+library(zoo)
+
+# Assuming data is your dataset and TARGET_energy is your target variable
+# Ensure the 'date' column is in datetime format
+data$date <- as.POSIXct(data$date, format="%Y-%m-%d %H:%M:%S")
+
+# Feature Engineering: Adding lagged features and rolling statistics
+data <- data %>%
+  mutate(
+    lag1 = lag(TARGET_energy, 1),
+    lag2 = lag(TARGET_energy, 2),
+    lag3 = lag(TARGET_energy, 3),
+    rollmean3 = zoo::rollmean(TARGET_energy, 3, fill = NA),
+    rollmean6 = zoo::rollmean(TARGET_energy, 6, fill = NA),
+    rollmean12 = zoo::rollmean(TARGET_energy, 12, fill = NA)
+  ) %>%
+  na.omit()
+
+# Normalize the data
+normalize <- function(x) {
+  return ((x - min(x)) / (max(x) - min(x)))
+}
+
+inverse_normalize <- function(x, orig_data) {
+  return (x * (max(orig_data) - min(orig_data)) + min(orig_data))
+}
+
+# Apply normalization
+data_normalized <- data %>%
+  mutate_at(vars(TARGET_energy, lag1, lag2, lag3, rollmean3, rollmean6, rollmean12), normalize)
+
+# Prepare the data for training and testing
+train_size <- floor(0.8 * nrow(data_normalized))
+train_data <- data_normalized[1:train_size, ]
+test_data <- data_normalized[(train_size + 1):nrow(data_normalized), ]
+
+x_train <- as.matrix(train_data %>% select(lag1, lag2, lag3, rollmean3, rollmean6, rollmean12))
+y_train <- train_data$TARGET_energy
+x_test <- as.matrix(test_data %>% select(lag1, lag2, lag3, rollmean3, rollmean6, rollmean12))
+y_test <- test_data$TARGET_energy
+
+# Define the MLP model
+mlp_model <- keras_model_sequential() %>%
+  layer_dense(units = 64, activation = 'relu', input_shape = ncol(x_train)) %>%
+  layer_dense(units = 64, activation = 'relu') %>%
+  layer_dense(units = 1)
+
+mlp_model %>% compile(
+  loss = 'mean_squared_error',
+  optimizer = optimizer_adam(learning_rate = 0.001)
+)
+
+# Train the MLP model
+history <- mlp_model %>% fit(
+  x_train, y_train,
+  epochs = 100,
+  batch_size = 32,
+  validation_split = 0.2,
+  verbose = 2
+)
+
+# Make predictions
+train_predict <- mlp_model %>% predict(x_train)
+test_predict <- mlp_model %>% predict(x_test)
+
+# Inverse the normalization
+train_predict <- inverse_normalize(train_predict, data$TARGET_energy)
+test_predict <- inverse_normalize(test_predict, data$TARGET_energy)
+train_actual <- inverse_normalize(y_train, data$TARGET_energy)
+test_actual <- inverse_normalize(y_test, data$TARGET_energy)
+
+# Evaluate the MLP model
+mlp_rmse <- sqrt(mean((test_predict - test_actual)^2))
+mlp_mae <- mean(abs(test_predict - test_actual))
+mlp_r2 <- 1 - sum((test_predict - test_actual)^2) / sum((test_actual - mean(test_actual))^2)
+
+cat("MLP - RMSE:", mlp_rmse, "MAE:", mlp_mae, "R^2:", mlp_r2, "\n")
+
+```
+
+```{r}
+# Install and load necessary packages
+install.packages("keras")
+install.packages("zoo")
+library(keras)
+library(dplyr)
+library(zoo)
+
+# Assuming data is your dataset and TARGET_energy is your target variable
+# Ensure the 'date' column is in datetime format
+data$date <- as.POSIXct(data$date, format="%Y-%m-%d %H:%M:%S")
+
+# Feature Engineering: Adding lagged features and rolling statistics
+data <- data %>%
+  mutate(
+    lag1 = lag(TARGET_energy, 1),
+    lag2 = lag(TARGET_energy, 2),
+    lag3 = lag(TARGET_energy, 3),
+    rollmean3 = zoo::rollmean(TARGET_energy, 3, fill = NA),
+    rollmean6 = zoo::rollmean(TARGET_energy, 6, fill = NA),
+    rollmean12 = zoo::rollmean(TARGET_energy, 12, fill = NA)
+  ) %>%
+  na.omit()
+
+# Normalize the data
+normalize <- function(x) {
+  return ((x - min(x)) / (max(x) - min(x)))
+}
+
+inverse_normalize <- function(x, orig_data) {
+  return (x * (max(orig_data) - min(orig_data)) + min(orig_data))
+}
+
+# Apply normalization
+data_normalized <- data %>%
+  mutate_at(vars(TARGET_energy, lag1, lag2, lag3, rollmean3, rollmean6, rollmean12), normalize)
+
+# Prepare the time series data
+ts_data <- ts(data_normalized$TARGET_energy, frequency = 24) # Assuming hourly data
+
+# Split the data into training and testing sets
+train_size <- floor(0.8 * nrow(data_normalized))
+train_data <- data_normalized[1:train_size, ]
+test_data <- data_normalized[(train_size + 1):nrow(data_normalized), ]
+
+# Convert to matrix format for MLP
+x_train <- as.matrix(train_data %>% select(lag1, lag2, lag3, rollmean3, rollmean6, rollmean12))
+y_train <- train_data$TARGET_energy
+x_test <- as.matrix(test_data %>% select(lag1, lag2, lag3, rollmean3, rollmean6, rollmean12))
+y_test <- test_data$TARGET_energy
+
+# Define the MLP model with hyperparameter tuning
+model <- keras_model_sequential() %>%
+  layer_dense(units = 128, activation = 'relu', input_shape = ncol(x_train)) %>%
+  layer_dropout(rate = 0.2) %>%
+  layer_dense(units = 64, activation = 'relu') %>%
+  layer_dropout(rate = 0.2) %>%
+  layer_dense(units = 32, activation = 'relu') %>%
+  layer_dense(units = 1)
+
+model %>% compile(
+  loss = 'mean_squared_error',
+  optimizer = optimizer_adam(learning_rate = 0.001),
+  metrics = c('mean_absolute_error')
+)
+
+# Train the model with increased epochs and batch size
+history <- model %>% fit(
+  x_train, y_train,
+  epochs = 100,
+  batch_size = 32,
+  validation_data = list(x_test, y_test),
+  verbose = 2
+)
+
+# Save the trained model
+model %>% save_model_hdf5("mlp_energy_model.h5")
+
+# Load the trained model (for future use)
+model <- load_model_hdf5("mlp_energy_model.h5")
+
+# Make predictions
+train_predict <- model %>% predict(x_train)
+test_predict <- model %>% predict(x_test)
+
+# Inverse the normalization
+train_predict <- inverse_normalize(train_predict, data$TARGET_energy)
+test_predict <- inverse_normalize(test_predict, data$TARGET_energy)
+train_actual <- inverse_normalize(y_train, data$TARGET_energy)
+test_actual <- inverse_normalize(y_test, data$TARGET_energy)
+
+# Evaluate the model
+mlp_rmse <- sqrt(mean((test_predict - test_actual)^2))
+mlp_mae <- mean(abs(test_predict - test_actual))
+mlp_r2 <- 1 - sum((test_predict - test_actual)^2) / sum((test_actual - mean(test_actual))^2)
+
+cat("MLP - RMSE:", mlp_rmse, "MAE:", mlp_mae, "R^2:", mlp_r2, "\n")
+
+
+```
 
