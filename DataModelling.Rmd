@@ -558,4 +558,24 @@ varImpPlot(rf_model)
 
 ```
 
+```{r}
+# Save the Random Forest model
+#save(rf_model, file = "random_forest_model.RData")
+
+# Load the Random Forest model (in a different code block or session)
+load("Models/random_forest_model.RData")
+
+# Predict using the loaded model
+train_predict <- predict(rf_model, x_train)
+test_predict <- predict(rf_model, x_test)
+
+# Evaluate the loaded model
+rf_rmse <- sqrt(mean((test_predict - y_test)^2))
+rf_mae <- mean(abs(test_predict - y_test))
+rf_r2 <- 1 - sum((test_predict - y_test)^2) / sum((y_test - mean(y_test))^2)
+
+cat("Random Forest - RMSE:", rf_rmse, "MAE:", rf_mae, "R^2:", rf_r2, "\n")
+
+```
+
 
