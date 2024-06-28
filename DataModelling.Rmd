@@ -706,7 +706,7 @@ ggplot(importance_df, aes(x = reorder(Feature, `%IncMSE`), y = `%IncMSE`)) +
   labs(title = "Feature Importance", x = "Features", y = "% Increase in MSE") +
   theme(axis.text.y = element_text(size = 10), plot.margin = margin(t = 1, r = 1, b = 1, l = 1, unit = "cm"))
 
-ggsave("feature_importance_plot.png", width = 10, height = 20)
+#ggsave("Graphs/feature_importance_plot.png", width = 10, height = 20)
 
 ```
 
