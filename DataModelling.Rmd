@@ -579,3 +579,123 @@ cat("Random Forest - RMSE:", rf_rmse, "MAE:", rf_mae, "R^2:", rf_r2, "\n")
 ```
 
 
+
+
+
+```{r}
+# Install and load necessary packages
+install.packages("randomForest")
+install.packages("zoo")
+install.packages("caret")
+library(randomForest)
+library(dplyr)
+library(zoo)
+library(caret)
+
+# Assuming data is your dataset and TARGET_energy is your target variable
+# Ensure the 'date' column is in datetime format
+data$date <- as.POSIXct(data$date, format="%Y-%m-%d %H:%M:%S")
+
+# Feature Engineering: Adding lagged features and rolling statistics
+data <- data %>%
+  mutate(
+    lag1 = lag(TARGET_energy, 1),
+    lag2 = lag(TARGET_energy, 2),
+    lag3 = lag(TARGET_energy, 3),
+    lag4 = lag(TARGET_energy, 4),
+    lag5 = lag(TARGET_energy, 5),
+    lag6 = lag(TARGET_energy, 6),
+    rollmean3 = zoo::rollmean(TARGET_energy, 3, fill = NA),
+    rollmean6 = zoo::rollmean(TARGET_energy, 6, fill = NA),
+    rollmean12 = zoo::rollmean(TARGET_energy, 12, fill = NA),
+    rollmean24 = zoo::rollmean(TARGET_energy, 24, fill = NA)
+  ) %>%
+  na.omit()
+
+# Split the data into training and testing sets
+set.seed(42)
+train_size <- floor(0.8 * nrow(data))
+train_data <- data[1:train_size, ]
+test_data <- data[(train_size + 1):nrow(data), ]
+
+# Define the feature matrix and target vector
+x_train <- train_data %>% select(-date, -TARGET_energy)
+y_train <- train_data$TARGET_energy
+x_test <- test_data %>% select(-date, -TARGET_energy)
+y_test <- test_data$TARGET_energy
+
+# Combine x_train and y_train for caret
+train_df <- cbind(x_train, TARGET_energy = y_train)
+
+# Define the hyperparameter grid
+mtry_grid <- c(2, 3, 4, 5, 6)
+nodesize_grid <- c(1, 5, 10)
+
+# Use caret's expand.grid for compatibility
+hyper_grid <- expand.grid(mtry = mtry_grid, nodesize = nodesize_grid)
+
+# Define control parameters for cross-validation
+control <- trainControl(method = "cv", number = 5)
+
+# Train the model using cross-validation
+rf_tuned <- train(
+  TARGET_energy ~ ., 
+  data = train_df,
+  method = "rf",
+  metric = "RMSE",
+  tuneGrid = hyper_grid,
+  trControl = control,
+  ntree = 500 # Use a fixed number of trees for tuning
+)
+
+# Print the best hyperparameters
+print(rf_tuned$bestTune)
+
+# Train the final model with the best hyperparameters
+set.seed(42)
+rf_final <- randomForest(
+  x = x_train,
+  y = y_train,
+  ntree = 500, # Use a fixed number of trees
+  mtry = rf_tuned$bestTune$mtry,
+  nodesize = rf_tuned$bestTune$nodesize,
+  importance = TRUE
+)
+
+# Make predictions with the final model
+train_predict <- predict(rf_final, x_train)
+test_predict <- predict(rf_final, x_test)
+
+# Evaluate the final model
+rf_final_rmse <- sqrt(mean((test_predict - y_test)^2))
+rf_final_mae <- mean(abs(test_predict - y_test))
+rf_final_r2 <- 1 - sum((test_predict - y_test)^2) / sum((y_test - mean(y_test))^2)
+
+cat("Random Forest Final - RMSE:", rf_final_rmse, "MAE:", rf_final_mae, "R^2:", rf_final_r2, "\n")
+
+# Feature Importance
+importance(rf_final)
+varImpPlot(rf_final)
+
+
+```
+
+### Explanation:
+1. **Hyperparameter Grid Definition:**
+   - `ntree` is fixed at 500 for tuning purposes to focus on `mtry` and `nodesize`.
+   - `hyper_grid` includes `mtry` and `nodesize`.
+
+2. **Cross-Validation Setup:**
+   - `trainControl(method = "cv", number = 5)` defines 5-fold cross-validation.
+
+3. **Model Training with Cross-Validation:**
+   - `train()` trains the model using the grid of hyperparameters and cross-validation.
+
+4. **Final Model Training:**
+   - Uses the best hyperparameters found during cross-validation to train the final Random Forest model.
+
+5. **Model Evaluation:**
+   - Makes predictions and evaluates the performance of the final model using RMSE, MAE, and R^2.
+
+This code should properly implement hyperparameter tuning for your Random Forest model. If you encounter any issues or have any specific requirements, please let me know!
+
