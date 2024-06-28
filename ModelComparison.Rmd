@@ -1,0 +1,59 @@
+---
+title: "ModelComparison"
+output: html_document
+date: "2024-06-28"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# Required packages
+library(ggplot2)
+library(tidyr)
+
+# Data
+model_metrics <- data.frame(
+  Model = c(
+    "Random Forest Final (Tuned with feature selection)",
+    "Random Forest (Only feature selection)",
+    "LSTM (Tuned)",
+    "LSTM",
+    "Tuned Gradient Boosting",
+    "Tuned Random Forest (General feature selection)",
+    "Gradient Boosting",
+    "Random Forest",
+    "Linear Regression"
+  ),
+  RMSE = c(
+    43.23051, 55.60064, 77.32212, 78.34101, 64.21605, 58.67541, 75.55071, 58.91217, 74.48276
+  ),
+  MAE = c(
+    24.63652, 30.4344, 43.84375, 43.83427, 34.58222, 28.60143, 44.29758, 28.63226, 42.76741
+  ),
+  R2 = c(
+    0.8303284, 0.7183661, 0.4556434, 0.4412025, 0.6293279, 0.6927204, 0.4995187, 0.690126, 0.5010507
+  )
+)
+
+# Convert data to long format for ggplot
+model_metrics_long <- model_metrics %>%
+  gather(key = "Metric", value = "Value", -Model)
+
+# Order by descending R2
+model_metrics$Model <- factor(model_metrics$Model, levels = model_metrics$Model[order(-model_metrics$R2)])
+
+# Plotting
+ggplot(model_metrics_long, aes(x = Model, y = Value, fill = Metric)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  coord_flip() +
+  theme_minimal() +
+  labs(title = "Model Comparison Metrics", x = "Model", y = "Value") +
+  theme(legend.position = "bottom") +
+  scale_fill_manual(values = c("RMSE" = "blue", "MAE" = "green", "R2" = "red")) +
+  facet_wrap(~ Metric, scales = "free_x")
+ggsave("Graphs/ModelComparison.png", width = 10, height = 20)
+
+```
+

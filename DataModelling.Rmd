@@ -225,80 +225,80 @@ cat("Tuned Gradient Boosting - RMSE:", gbm_tuned_rmse, "MAE:", gbm_tuned_mae, "R
 
 #### LSTM
 ```{r}
-# Install and load necessary packages
-install.packages("keras")
-install.packages("tensorflow")
-install.packages("zoo")
-library(keras)
-library(tensorflow)
-library(dplyr)
-library(zoo)
-
-# Assuming data is your dataset and TARGET_energy is your target variable
-# Ensure the 'date' column is in datetime format
-data$date <- as.POSIXct(data$date, format="%Y-%m-%d %H:%M:%S")
-
-# Feature Engineering: Adding lagged features and rolling statistics
-data <- data %>%
-  mutate(
-    lag1 = lag(TARGET_energy, 1),
-    lag2 = lag(TARGET_energy, 2),
-    lag3 = lag(TARGET_energy, 3),
-    rollmean3 = zoo::rollmean(TARGET_energy, 3, fill = NA),
-    rollmean6 = zoo::rollmean(TARGET_energy, 6, fill = NA),
-    rollmean12 = zoo::rollmean(TARGET_energy, 12, fill = NA)
-  ) %>%
-  na.omit()
-
-# Normalize the data
-normalize <- function(x) {
-  return ((x - min(x)) / (max(x) - min(x)))
-}
-
-inverse_normalize <- function(x, orig_data) {
-  return (x * (max(orig_data) - min(orig_data)) + min(orig_data))
-}
-
-# Apply normalization
-data_normalized <- data %>%
-  mutate_at(vars(TARGET_energy, lag1, lag2, lag3, rollmean3, rollmean6, rollmean12), normalize)
-
-# Prepare the time series data
-ts_data <- ts(data_normalized$TARGET_energy, frequency = 24) # Assuming hourly data
-
-# Split the data into training and testing sets
-train_size <- floor(0.8 * nrow(data_normalized))
-train_data <- data_normalized[1:train_size, ]
-test_data <- data_normalized[(train_size + 1):nrow(data_normalized), ]
-
-# Convert to matrix format for LSTM
-x_train <- array(data = as.matrix(train_data %>% select(lag1, lag2, lag3, rollmean3, rollmean6, rollmean12)), dim = c(nrow(train_data), 1, 6))
-y_train <- array(data = train_data$TARGET_energy, dim = c(nrow(train_data), 1))
-x_test <- array(data = as.matrix(test_data %>% select(lag1, lag2, lag3, rollmean3, rollmean6, rollmean12)), dim = c(nrow(test_data), 1, 6))
-y_test <- array(data = test_data$TARGET_energy, dim = c(nrow(test_data), 1))
-
-# Define the LSTM model with hyperparameter tuning
-model <- keras_model_sequential() %>%
-  layer_lstm(units = 100, input_shape = c(1, 6), return_sequences = TRUE, dropout = 0.2, recurrent_dropout = 0.2) %>%
-  layer_lstm(units = 100, return_sequences = FALSE, dropout = 0.2, recurrent_dropout = 0.2) %>%
-  layer_dense(units = 1)
-
-model %>% compile(
-  loss = 'mean_squared_error',
-  optimizer = optimizer_adam(learning_rate = 0.001)
-)
-
-# Train the model with increased epochs and batch size
-history <- model %>% fit(
-  x_train, y_train,
-  epochs = 100,
-  batch_size = 32,
-  validation_data = list(x_test, y_test),
-  verbose = 2
-)
-
-# Save the trained model
-model %>% save_model_hdf5("lstm_energy_model.h5")
+# # Install and load necessary packages
+# install.packages("keras")
+# install.packages("tensorflow")
+# install.packages("zoo")
+# library(keras)
+# library(tensorflow)
+# library(dplyr)
+# library(zoo)
+# 
+# # Assuming data is your dataset and TARGET_energy is your target variable
+# # Ensure the 'date' column is in datetime format
+# data$date <- as.POSIXct(data$date, format="%Y-%m-%d %H:%M:%S")
+# 
+# # Feature Engineering: Adding lagged features and rolling statistics
+# data <- data %>%
+#   mutate(
+#     lag1 = lag(TARGET_energy, 1),
+#     lag2 = lag(TARGET_energy, 2),
+#     lag3 = lag(TARGET_energy, 3),
+#     rollmean3 = zoo::rollmean(TARGET_energy, 3, fill = NA),
+#     rollmean6 = zoo::rollmean(TARGET_energy, 6, fill = NA),
+#     rollmean12 = zoo::rollmean(TARGET_energy, 12, fill = NA)
+#   ) %>%
+#   na.omit()
+# 
+# # Normalize the data
+# normalize <- function(x) {
+#   return ((x - min(x)) / (max(x) - min(x)))
+# }
+# 
+# inverse_normalize <- function(x, orig_data) {
+#   return (x * (max(orig_data) - min(orig_data)) + min(orig_data))
+# }
+# 
+# # Apply normalization
+# data_normalized <- data %>%
+#   mutate_at(vars(TARGET_energy, lag1, lag2, lag3, rollmean3, rollmean6, rollmean12), normalize)
+# 
+# # Prepare the time series data
+# ts_data <- ts(data_normalized$TARGET_energy, frequency = 24) # Assuming hourly data
+# 
+# # Split the data into training and testing sets
+# train_size <- floor(0.8 * nrow(data_normalized))
+# train_data <- data_normalized[1:train_size, ]
+# test_data <- data_normalized[(train_size + 1):nrow(data_normalized), ]
+# 
+# # Convert to matrix format for LSTM
+# x_train <- array(data = as.matrix(train_data %>% select(lag1, lag2, lag3, rollmean3, rollmean6, rollmean12)), dim = c(nrow(train_data), 1, 6))
+# y_train <- array(data = train_data$TARGET_energy, dim = c(nrow(train_data), 1))
+# x_test <- array(data = as.matrix(test_data %>% select(lag1, lag2, lag3, rollmean3, rollmean6, rollmean12)), dim = c(nrow(test_data), 1, 6))
+# y_test <- array(data = test_data$TARGET_energy, dim = c(nrow(test_data), 1))
+# 
+# # Define the LSTM model with hyperparameter tuning
+# model <- keras_model_sequential() %>%
+#   layer_lstm(units = 100, input_shape = c(1, 6), return_sequences = TRUE, dropout = 0.2, recurrent_dropout = 0.2) %>%
+#   layer_lstm(units = 100, return_sequences = FALSE, dropout = 0.2, recurrent_dropout = 0.2) %>%
+#   layer_dense(units = 1)
+# 
+# model %>% compile(
+#   loss = 'mean_squared_error',
+#   optimizer = optimizer_adam(learning_rate = 0.001)
+# )
+# 
+# # Train the model with increased epochs and batch size
+# history <- model %>% fit(
+#   x_train, y_train,
+#   epochs = 100,
+#   batch_size = 32,
+#   validation_data = list(x_test, y_test),
+#   verbose = 2
+# )
+# 
+# # Save the trained model
+# model %>% save_model_hdf5("lstm_energy_model.h5")
 
 
 
