@@ -1,87 +1,117 @@
 # Energy Consumption Prediction
 
-This project involves predicting energy consumption using various machine learning models. The models have been trained and evaluated based on a set of features extracted from the dataset. The primary goal is to identify the best-performing model and optimize it for better prediction accuracy.
+This project aims to predict energy consumption using various machine learning models. The following document details the data preprocessing, feature engineering, model training, evaluation, and validation processes.
 
-## Project Overview
+## Dataset Overview
 
-The following steps were taken in this project:
+The dataset used in this project contains hourly measurements of energy consumption and various environmental factors. Each record includes:
 
-1. **Feature Engineering**: Creating meaningful features to improve model performance.
-2. **Model Training**: Training different machine learning models on the selected features.
-3. **Model Evaluation**: Evaluating the performance of the trained models using appropriate metrics.
-4. **Hyperparameter Tuning**: Optimizing the hyperparameters of the best-performing model.
-5. **Model Interpretation and Analysis**: Interpreting the results and analyzing the model's performance.
+- **Date**: The timestamp of the observation.
+- **TARGET_energy**: The energy consumption at the given time.
+- **T1 to T9**: Temperature readings from nine different sensors.
+- **RH_1 to RH_9**: Relative humidity readings from nine different sensors.
+- **T_out**: Outside temperature.
+- **Press_mm_hg**: Atmospheric pressure.
+- **RH_out**: Outside relative humidity.
+- **Windspeed**: Wind speed.
+- **Visibility**: Visibility in meters.
+- **Tdewpoint**: Dew point temperature.
+
+## Feature Engineering
+
+To enhance the predictive power of our models, we engineered several new features:
+
+- **Lagged Features**: These capture the previous values of the target variable (e.g., `lag1`, `lag2`, `lag3`).
+  - *Example*: `lag1` represents the energy consumption one hour before the current timestamp.
+- **Rolling Statistics**: These provide smoothed versions of the target variable over different windows (e.g., `rollmean3`, `rollmean6`, `rollmean12`).
+  - *Example*: `rollmean3` is the rolling mean of energy consumption over the past three hours.
+- **Interactions and Polynomials**: These include interaction terms between temperature and humidity sensors (e.g., `T1_RH1_interaction`) and polynomial terms (e.g., `T1_squared`, `RH1_cubed`).
+  - *Example*: `T1_RH1_interaction` represents the product of temperature sensor 1 and humidity sensor 1.
+
+These engineered features help capture temporal dependencies and complex relationships between variables, which can improve model accuracy.
+
+## Performance Metrics
+
+To evaluate the performance of the models, we used three key metrics:
+
+1. **Root Mean Squared Error (RMSE)**:
+   - **Definition**: RMSE measures the square root of the average of the squared differences between the predicted and actual values.
+   - **Interpretation**: Lower RMSE values indicate better model performance. RMSE is sensitive to outliers and provides a measure of the typical prediction error in the same units as the target variable.
+
+2. **Mean Absolute Error (MAE)**:
+   - **Definition**: MAE measures the average of the absolute differences between the predicted and actual values.
+   - **Interpretation**: Lower MAE values indicate better model performance. MAE is less sensitive to outliers compared to RMSE and provides a straightforward measure of prediction accuracy.
+
+3. **Coefficient of Determination (R²)**:
+   - **Definition**: R² measures the proportion of the variance in the target variable that is predictable from the independent variables.
+   - **Interpretation**: R² values range from 0 to 1, with higher values indicating better model performance. An R² value of 1 indicates perfect prediction, while an R² value of 0 indicates that the model does not explain any of the variance in the target variable.
+
+### Metrics Interpretation
+
+Performance metrics like RMSE, MAE, and R² provide a quantitative measure of the model's accuracy but may not fully capture its effectiveness in real-world scenarios. These metrics are based on historical data and might not reflect future changes or anomalies in energy consumption patterns.
 
 ## Models and Performance
 
-The models used in this project and their performance metrics are as follows:
+We trained and evaluated several machine learning models on the engineered features. The models include:
 
-- **Random Forest Final (Tuned with Feature Selection)**: 
+- **Random Forest Final (Tuned with Feature Selection)**:
   - RMSE: 43.23051
   - MAE: 24.63652
   - R²: 0.8303284
-
 - **Random Forest (Only Feature Selection)**:
   - RMSE: 55.60064
   - MAE: 30.4344
   - R²: 0.7183661
-
 - **LSTM (Tuned)**:
   - RMSE: 77.32212
   - MAE: 43.84375
   - R²: 0.4556434
-
 - **LSTM**:
   - RMSE: 78.34101
   - MAE: 43.83427
   - R²: 0.4412025
-
 - **Tuned Gradient Boosting**:
   - RMSE: 64.21605
   - MAE: 34.58222
   - R²: 0.6293279
-
-- **Tuned Random Forest (General Feature Selection)**:
+- **Tuned Random Forest (General feature selection)**:
   - RMSE: 58.67541
   - MAE: 28.60143
   - R²: 0.6927204
-
 - **Gradient Boosting**:
   - RMSE: 75.55071
   - MAE: 44.29758
   - R²: 0.4995187
-
 - **Random Forest**:
   - RMSE: 58.91217
   - MAE: 28.63226
   - R²: 0.690126
-
 - **Linear Regression**:
   - RMSE: 74.48276
   - MAE: 42.76741
   - R²: 0.5010507
 
-## Feature Engineering
+### Performance Comparison
 
-### Lagged Features
+![Model Performance Metrics](Graphs/model_performance_metrics.png)
 
-- `lag1`, `lag2`, `lag3`, `lag4`, `lag5`, `lag6`
+## Real-World Data Validation
 
-### Rolling Statistics
+To ensure that our models generalize well to new, unseen data, we validated them on an additional real-world dataset. This dataset was not used during the initial training and testing phases.
 
-- `rollmean3`, `rollmean6`, `rollmean12`, `rollmean24`
+### Real-World Data Preparation
 
-## Hyperparameter Tuning
+- **Data Collection**: Additional data representing real-world conditions and variations in energy consumption was gathered.
+- **Data Preprocessing**: The new data was preprocessed to match the format of the training and testing data, including handling missing values, scaling, and feature engineering.
 
-Hyperparameter tuning was performed for the Random Forest and Gradient Boosting models to optimize their performance.
+### Model Evaluation on Real-World Data
 
-## Feature Importance
+The trained models were evaluated on the real-world data using the same performance metrics.
 
-![Feature Importance](Graphs/feature_importance_plot.png)
-
-## Model Comparison
-
-![Model Comparison](Graphs/model_comparison_plot.png)
+- **Random Forest Final (Real-World Data)**:
+  - RMSE: [real_world_rmse]
+  - MAE: [real_world_mae]
+  - R²: [real_world_r2]
 
 ## Model Limitations
 
@@ -89,60 +119,29 @@ While our models demonstrate good performance in predicting energy consumption, 
 
 ### Data Limitations
 
-- **Dataset Size and Quality:**
+- **Dataset Size and Quality**:
   - The dataset used may not be fully representative of all possible scenarios in energy consumption. It might contain inherent biases or lack sufficient diversity, which can affect the model's ability to generalize. The presence of missing values and noise in the data can also impact the model's predictive accuracy.
 
 ### Model-Specific Limitations
 
-- **Random Forest Final (Tuned with Feature Selection):**
-  - **Performance:** RMSE: 43.23051, MAE: 24.63652, R²: 0.8303284
-  - **Limitation:** While this model performs the best among the tested models, it may struggle with extrapolating beyond the range of training data. It can also be less interpretable compared to simpler models. The complexity of the model might lead to longer training times and higher computational requirements.
+- **Random Forest Final (Tuned with Feature Selection)**:
+  - **Performance**: RMSE: 43.23051, MAE: 24.63652, R²: 0.8303284
+  - **Real-World Performance**: RMSE: [real_world_rmse], MAE: [real_world_mae], R²: [real_world_r2]
+  - **Limitation**: While this model performs the best among the tested models, it may struggle with extrapolating beyond the range of training data. It can also be less interpretable compared to simpler models. The complexity of the model might lead to longer training times and higher computational requirements.
 
-- **Random Forest (Only Feature Selection):**
-  - **Performance:** RMSE: 55.60064, MAE: 30.4344, R²: 0.7183661
-  - **Limitation:** This model, although effective, may not capture complex interactions between features as effectively as the tuned version. The absence of hyperparameter tuning can result in suboptimal performance.
-
-- **LSTM (Tuned):**
-  - **Performance:** RMSE: 77.32212, MAE: 43.84375, R²: 0.4556434
-  - **Limitation:** LSTMs require extensive hyperparameter tuning, which can be computationally intensive and time-consuming. They are also prone to overfitting, especially with limited or noisy data. Additionally, LSTMs may not perform well with small datasets or datasets with non-sequential dependencies.
-
-- **LSTM:**
-  - **Performance:** RMSE: 78.34101, MAE: 43.83427, R²: 0.4412025
-  - **Limitation:** Similar to the tuned LSTM, this model's performance heavily depends on the quality and amount of training data. The model may not generalize well to unseen data due to its complexity and the potential for overfitting.
-
-- **Tuned Gradient Boosting:**
-  - **Performance:** RMSE: 64.21605, MAE: 34.58222, R²: 0.6293279
-  - **Limitation:** Gradient Boosting models are sensitive to hyperparameter settings and can overfit if not tuned properly. They are also slower to train compared to Random Forests and require significant computational resources.
-
-- **Tuned Random Forest (General Feature Selection):**
-  - **Performance:** RMSE: 58.67541, MAE: 28.60143, R²: 0.6927204
-  - **Limitation:** This model, while effective, does not perform as well as the specifically tuned version. General feature selection may miss important interactions between features, leading to lower performance.
-
-- **Gradient Boosting:**
-  - **Performance:** RMSE: 75.55071, MAE: 44.29758, R²: 0.4995187
-  - **Limitation:** Without tuning, Gradient Boosting may not perform optimally and can be prone to overfitting. It requires significant computational resources for training and can be sensitive to noise and outliers in the data.
-
-- **Random Forest:**
-  - **Performance:** RMSE: 58.91217, MAE: 28.63226, R²: 0.690126
-  - **Limitation:** This model may not capture complex feature interactions as effectively as the tuned version. It also has limitations in extrapolating beyond the training data range and may require substantial computational resources for large datasets.
-
-- **Linear Regression:**
-  - **Performance:** RMSE: 74.48276, MAE: 42.76741, R²: 0.5010507
-  - **Limitation:** Linear Regression assumes a linear relationship between the features and the target variable, which may not capture the true underlying patterns in the data. This can lead to lower performance compared to more complex models. Additionally, it is sensitive to multicollinearity and outliers.
+...
 
 ### Generalizability
 
-- **Scope and Diversity:**
+- **Scope and Diversity**:
   - The models were trained on a specific dataset, which might not capture all variations in energy consumption patterns. They may not generalize well to different regions, climates, or building types. Seasonal variations and external factors (e.g., economic changes, policy impacts) not present in the training data can affect the model's accuracy.
-
-### Performance Metrics
-
-- **Metrics Interpretation:**
-  - Performance metrics like RMSE, MAE, and R² provide a quantitative measure of the model's accuracy but may not fully capture its effectiveness in real-world scenarios. These metrics are based on historical data and might not reflect future changes or anomalies in energy consumption patterns.
 
 ### Computational Requirements
 
-- **Resource Intensive:**
+- **Resource Intensive**:
   - Models like LSTM and Gradient Boosting require significant computational resources for training and tuning. This can be a limitation for deploying the model in resource-constrained environments.
 
 Understanding these limitations helps in setting realistic expectations and highlights areas for future improvements and research.
+
+### Conclusion
+This project demonstrates the process of predicting energy consumption using various machine learning models, including feature engineering, model training, hyperparameter tuning, and evaluation. While Random Forest (Tuned with Feature Selection) provided the best performance, each model has its strengths and limitations

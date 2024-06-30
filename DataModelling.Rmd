@@ -626,47 +626,47 @@ train_df <- cbind(x_train, TARGET_energy = y_train)
 # Define the hyperparameter grid
 mtry_grid <- c(2, 3, 4, 5, 6)
 
-# Use caret's expand.grid for compatibility
-hyper_grid <- expand.grid(mtry = mtry_grid)
-
-# Define control parameters for cross-validation
-control <- trainControl(method = "cv", number = 5)
-
-# Train the model using cross-validation
-rf_tuned <- train(
-  TARGET_energy ~ ., 
-  data = train_df,
-  method = "rf",
-  metric = "RMSE",
-  tuneGrid = hyper_grid,
-  trControl = control,
-  ntree = 500 # Use a fixed number of trees for tuning
-)
-
-# Print the best hyperparameters
-print(rf_tuned$bestTune)
-
-# Train the final model with the best hyperparameters
-set.seed(42)
-rf_final <- randomForest(
-  x = x_train,
-  y = y_train,
-  ntree = 500, # Use a fixed number of trees
-  mtry = rf_tuned$bestTune$mtry,
-  nodesize = 5, # Set nodesize directly
-  importance = TRUE
-)
-
-# Make predictions with the final model
-train_predict <- predict(rf_final, x_train)
-test_predict <- predict(rf_final, x_test)
-
-# Evaluate the final model
-rf_final_rmse <- sqrt(mean((test_predict - y_test)^2))
-rf_final_mae <- mean(abs(test_predict - y_test))
-rf_final_r2 <- 1 - sum((test_predict - y_test)^2) / sum((y_test - mean(y_test))^2)
-
-cat("Random Forest Final - RMSE:", rf_final_rmse, "MAE:", rf_final_mae, "R^2:", rf_final_r2, "\n")
+# # Use caret's expand.grid for compatibility
+# hyper_grid <- expand.grid(mtry = mtry_grid)
+# 
+# # Define control parameters for cross-validation
+# control <- trainControl(method = "cv", number = 5)
+# 
+# # Train the model using cross-validation
+# rf_tuned <- train(
+#   TARGET_energy ~ ., 
+#   data = train_df,
+#   method = "rf",
+#   metric = "RMSE",
+#   tuneGrid = hyper_grid,
+#   trControl = control,
+#   ntree = 500 # Use a fixed number of trees for tuning
+# )
+# 
+# # Print the best hyperparameters
+# print(rf_tuned$bestTune)
+# 
+# # Train the final model with the best hyperparameters
+# set.seed(42)
+# rf_final <- randomForest(
+#   x = x_train,
+#   y = y_train,
+#   ntree = 500, # Use a fixed number of trees
+#   mtry = rf_tuned$bestTune$mtry,
+#   nodesize = 5, # Set nodesize directly
+#   importance = TRUE
+# )
+# 
+# # Make predictions with the final model
+# train_predict <- predict(rf_final, x_train)
+# test_predict <- predict(rf_final, x_test)
+# 
+# # Evaluate the final model
+# rf_final_rmse <- sqrt(mean((test_predict - y_test)^2))
+# rf_final_mae <- mean(abs(test_predict - y_test))
+# rf_final_r2 <- 1 - sum((test_predict - y_test)^2) / sum((y_test - mean(y_test))^2)
+# 
+# cat("Random Forest Final - RMSE:", rf_final_rmse, "MAE:", rf_final_mae, "R^2:", rf_final_r2, "\n")
 
 # Feature Importance
 importance(rf_final)
