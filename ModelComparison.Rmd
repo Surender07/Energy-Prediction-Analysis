@@ -53,7 +53,7 @@ ggplot(model_metrics_long, aes(x = Model, y = Value, fill = Metric)) +
   theme(legend.position = "bottom") +
   scale_fill_manual(values = c("RMSE" = "blue", "MAE" = "green", "R2" = "red")) +
   facet_wrap(~ Metric, scales = "free_x")
-ggsave("Graphs/ModelComparison.png", width = 10, height = 20)
+ggsave("Graphs/ModelComparison.png", width = 10, height = 20, bg = "white")
 
 ```
 
