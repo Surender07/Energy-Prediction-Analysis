@@ -44,7 +44,7 @@ model_metrics_long <- model_metrics %>%
 # Order by descending R2
 model_metrics$Model <- factor(model_metrics$Model, levels = model_metrics$Model[order(-model_metrics$R2)])
 
-# Plotting
+# Plotting comparison graphs
 ggplot(model_metrics_long, aes(x = Model, y = Value, fill = Metric)) +
   geom_bar(stat = "identity", position = "dodge") +
   coord_flip() +
