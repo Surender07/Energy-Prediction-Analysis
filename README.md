@@ -4,7 +4,7 @@ This project aims to predict energy consumption using various machine learning m
 
 ## Dataset Overview
 
-The dataset used in this project contains hourly measurements of energy consumption and various environmental factors. Each record includes:
+The dataset used in this project contains hourly measurements of energy consumption and various environmental factors. Each record includes: 
 
 - **Date**: The timestamp of the observation.
 - **TARGET_energy**: The energy consumption at the given time.
